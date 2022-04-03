@@ -1,0 +1,30 @@
+[bof]
+:버퍼 오버플로우를 의미
+
+buffer:  한 곳에서 다른 곳으로 데이터를 이동시킬 때 임시적으로 그 데이터를
+           저장하기 위해 사용되는 물리적인 메모리 저장소의 영역
+
+[레지스터]
+
+ebp: base pointer; 스택의 최하단을 가르킴
+
+esp: stack pointer; 스택의 최상단을 가르킴
+
+eip: instruction pointer 다음 실행할 명령의 주소를 가르킴
+
+
+[레지스터의 기작]
+
+
+-영상보고 putty에 해보기!!
+
+1. buffer가 길면 그냥 거기에 shell코드 넣기
+
+2. ret넘어서 shell 코드 넣기(buffer초기화하는 코드에서 유용)
+
+3.argv[2]에 shell코드 넣기(과제)
+
+
+
+
+

