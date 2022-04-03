@@ -1,0 +1,46 @@
+[정찰 : 정보 탐색]
+> 뭐하는 사이트인가?
+> 쓰인 프론트엔드와 백엔드 프레임워크는 무엇이 있는가?
+> 깃허브에 repository가 존재하는가?
+
+[정찰 : subdomain recon]
+1. sublist3r
+2. https://subdomainfinder.c99.nl/ 사이트 이용
+
+[정찰 : port scanning]
+1. nmap > search seem-vulnerable opened port
+
+[정찰 : contents discovery]
+1. ffuf + jhaddix_wordlist
+2. ffuf + seclist
+3. waybackurls
+4. github-endpoints (if repo is exist)
+
+[정찰 : screenshot]
+1. gowitness	> seem-vulnerable page search
+	> opened port가 많을 시 go witness로 각 port 스크린샷 확인
+	> content discovery로 확인된 endpoint들이 많을 때 스크린샷 확인
+
+[취약점 탐색 : github 존재시]
+1. wraith repo of site > data leakage search
+2. search for seem-vulnerable ednpoint from result of github-endpoints
+<script>alert(1);</script>
+[취약점 탐색 : 직접 탐색]
+1. IDOR
+2. SSRF
+3. CSRF
+4. XSS
+5. SSTI
+6. SQLi
+7. OAuth misconfiguration
+8. race condition
+9. parameter pollution
+10. cache pollution
+11. open redirection
+12. expectable token search
+13. CRLF(Carriage Return / Line Feed) Injection
+14. CL.TE 중복 여부 확인 > HTTP request smuggling
+15. external XML injection bug
+16. logic error
+
+[취약점 탐색 : 사용하고 있는 open source archetecture 구글링]

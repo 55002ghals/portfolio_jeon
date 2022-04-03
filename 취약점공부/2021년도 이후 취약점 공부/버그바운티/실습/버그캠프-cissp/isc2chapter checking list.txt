@@ -1,0 +1,150 @@
+[정찰 : 정보 탐색]
+> 뭐하는 사이트인가?
+	->(ISC)² Korea Chapter(사단법인 한국CISSP협회)의 대표 홈페이지는 국내
+   	 CISSP 자격증 소지자의 보수교육(CPE)과 보안 세미나, 협회 내 소통 활동을 장려하기 위한 공간입니다.
+
+> 쓰인 프론트엔드와 백엔드 프레임워크는 무엇이 있는가?
+	-> 데비안 리눅스 운영체제에서 돌아가고, 아파치 웹 서버(2.4.25)를 사용 jQuery 라이브러리를 사용하며
+   	  php로 페이지를 짰다.
+
+> 깃허브에 repository가 존재하는가?
+	-> NONE
+
+[정찰 : subdomain recon]
+1. sublist3r
+	->ckecked
+
+2. https://subdomainfinder.c99.nl/ 사이트 이용
+	->checked
+
+[정찰 : port scanning]
+1. nmap > search seem-vulnerable opened port
+cmd : "nmap -sV -T 4 -p 0-10000 1.234.27.139"
+	-> 0-10000에서
+	PORT     STATE SERVICE    VERSION
+	80/tcp   open  http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+	443/tcp  open  ssl/http   Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+	2377/tcp open  ssl/swarm?
+	7946/tcp open  unknown
+
+	@2377 포트는 docker swamp 서비스를 이용하기 위해 주로 열어둔다. 해당 swamp 시스템에 join하기 위해서는 서버에서 docker init을 할때 제공되는
+	   token이 있어야하나, 이를 알 수 없기에 해당 포트에 접근할 수 는 없을 것 같다. token을 제공하지 않은 command line으로 접근 시도하니 다음이 출력됨.
+	kali@kali:~$ sudo docker swarm join 1.234.27.139:2377
+	Error response from daemon: rpc error: code = InvalidArgument desc = A valid join token is necessary to join this cluster
+	
+	@7946 포트는 노드 사이의 docker swamp 통신을 위해 사용됨.
+	kali@kali:~$ sudo docker swarm join 1.234.27.139:7946
+	Error response from daemon: rpc error: code = Unavailable desc = connection error: desc = "transport: authentication handshake failed: tls: first record does not look like a TLS handshake"
+	-> TLS handskake 키워드가 보여서 tcp 통신이 아니여서 그런가 라고 생각되어 netcat(tcp 통신을 사용한다.)으로 접근을 시도. 실패
+	kali@kali:~$ nc 1.234.27.139 7946
+	kali@kali:~$ 
+[정찰 : contents discovery]
+1. ffuf + jhaddix_wordlist
+cmd1 : "ffuf -c -v -w /home/kali/wordlist/jhaddix_content_discovery_list/content_discovery_all.txt -u https://isc2chapter.kr/FUZZ -o isc2chapter_ffuf_res.json"
+	@ffuf의 -o 옵션으로 json 파일 저장 가능
+	@json파일을 그냥 읽으면 읽기가 굉장히 힘들다. 다음의 python 옵션을 통해 더 예쁘게 출력 가능하다.
+		cat ...json | python -mjson.tool
+	-> 결과값이 너무 복잡해서 한번 더함
+cmd2 : "ffuf -w ~/wordlist/jhaddix_content_discovery_list/content_discovery_all.txt -u https://isc2chapter.kr/FUZZ"
+	-> 수상한 얘들
+bbs                     [Status: 301, Size: 234, Words: 14, Lines: 8]
+bbs/                    [Status: 403, Size: 199, Words: 14, Lines: 8] v
+bbs/register.php        [Status: 200, Size: 10852, Words: 2067, Lines: 281]
+bbs/search.php          [Status: 200, Size: 10339, Words: 1761, Lines: 267]
+bbs/rss.php             [Status: 200, Size: 40, Words: 4, Lines: 1] v
+common.php              [Status: 200, Size: 0, Words: 1, Lines: 1]
+config.php              [Status: 200, Size: 0, Words: 1, Lines: 1]
+css/                    [Status: 403, Size: 199, Words: 14, Lines: 8]
+css                     [Status: 301, Size: 234, Words: 14, Lines: 8]
+/css                    [Status: 301, Size: 234, Words: 14, Lines: 8]
+custom/                 [Status: 403, Size: 199, Words: 14, Lines: 8]
+custom                  [Status: 301, Size: 237, Words: 14, Lines: 8] v
+/data                   [Status: 301, Size: 235, Words: 14, Lines: 8]
+data/                   [Status: 403, Size: 199, Words: 14, Lines: 8] v
+data                    [Status: 301, Size: 235, Words: 14, Lines: 8] v
+data/cache              [Status: 301, Size: 241, Words: 14, Lines: 8] v
+data/cache/index.htm    [Status: 403, Size: 199, Words: 14, Lines: 8] v
+data/content/           [Status: 403, Size: 199, Words: 14, Lines: 8] v
+data/file               [Status: 301, Size: 240, Words: 14, Lines: 8]
+data/tmp/               [Status: 403, Size: 199, Words: 14, Lines: 8]
+extend                  [Status: 301, Size: 237, Words: 14, Lines: 8]
+extend/                 [Status: 403, Size: 199, Words: 14, Lines: 8]
+_head.php               [Status: 200, Size: 0, Words: 1, Lines: 1]
+head.php                [Status: 200, Size: 0, Words: 1, Lines: 1] v
+..
+info.php/               [Status: 200, Size: 388, Words: 99, Lines: 17]
+info.php                [Status: 200, Size: 388, Words: 99, Lines: 17] v
+install                 [Status: 301, Size: 238, Words: 14, Lines: 8]
+install/                [Status: 200, Size: 623, Words: 57, Lines: 23] v
+	@사이트가 그누보드를 사용하고 있음을 확인.
+	@그누보드 : 우리나라 SIR 소프트에서 개발한 홈페이지용 전자 게시판 소프트웨어, php 언어로 작성됨.
+		    최선버전은 5 (https://eunyoe.tistory.com/69  https://github.com/gnuboard/gnuboard5)
+		-> 그누보드에서 앱이랑 api가 모두 사용된 것 처럼 보임
+js/                     [Status: 403, Size: 199, Words: 14, Lines: 8]
+/js                     [Status: 301, Size: 233, Words: 14, Lines: 8]
+js                      [Status: 301, Size: 233, Words: 14, Lines: 8] v
+js/common.js            [Status: 200, Size: 20738, Words: 5073, Lines: 754] v
+lib/                    [Status: 403, Size: 199, Words: 14, Lines: 8]
+lib                     [Status: 301, Size: 234, Words: 14, Lines: 8]
+/lib                    [Status: 301, Size: 234, Words: 14, Lines: 8] v
+mobile/                 [Status: 200, Size: 0, Words: 1, Lines: 1]
+mobile                  [Status: 301, Size: 237, Words: 14, Lines: 8] v
+page.php                [Status: 200, Size: 10745, Words: 1533, Lines: 241] v
+plugin/                 [Status: 403, Size: 199, Words: 14, Lines: 8]
+plugin                  [Status: 301, Size: 237, Words: 14, Lines: 8] v
+plugin/kcaptcha         [Status: 301, Size: 246, Words: 14, Lines: 8] v
+server-status/          [Status: 403, Size: 199, Words: 14, Lines: 8]
+server-status           [Status: 403, Size: 199, Words: 14, Lines: 8] v
+skin                    [Status: 301, Size: 235, Words: 14, Lines: 8]
+skin/                   [Status: 403, Size: 199, Words: 14, Lines: 8] v
+skin/board              [Status: 301, Size: 241, Words: 14, Lines: 8] v
+theme                   [Status: 301, Size: 236, Words: 14, Lines: 8]
+theme/                  [Status: 403, Size: 199, Words: 14, Lines: 8] v
+-----------------------------------------------------------------------------------
+https://isc2chapter.kr/bbs/search.php?srows=0&gr_id=&sfl=wr_content&stx=aaaaaa&sop=and에서 발췌
+	@sqlmap 결과 non-injectable
+	   cmd : "sqlmap --level 5 --risk 3 -u "https://isc2chapter.kr/bbs/search.php?srows=0&gr_id=&sfl=wr_content&stx=aaaaaa&sop=and" -p {각 parameter}"
+"https://isc2chapter.kr/bbs/profile.php?mb_id=5502ghals" class="sv_member" title="rekcatta 자기소개" target="_blank" rel="nofollow" onclick="return false;"><span class="profile_img">
+"https://isc2chapter.kr/bbs/memo_form.php?me_recv_mb_id=5502ghals" onclick="win_memo(this.href); return false;">쪽지보내기</a>
+"https://isc2chapter.kr/bbs/formmail.php?mb_id=5502ghals&amp;name=rekcatta&amp;email=lZJtapSXmM3DpNd51JSpmtaUm6Oj" onclick="win_email(this.href); return false;">메일보내기</a>
+"https://isc2chapter.kr/bbs/profile.php?mb_id=5502ghals" onclick="win_profile(this.href); return false;">자기소개</a>
+"https://isc2chapter.kr/bbs/new.php?mb_id=5502ghals">전체게시물</a>
+-----------------------------------------------------------------------------------
+2. ffuf + seclist
+	-> not checked yet
+3. waybackurls
+	->checked
+4. github-endpoints (if repo is exist)
+	->disabled
+
+	@해야할 것 : txt에서 자신이 원하느 부분만 떼어내는 방법(scripting using pipeline) 구글링
+
+[정찰 : screenshot]
+1. gowitness	> seem-vulnerable page search
+	> opened port가 많을 시 go witness로 각 port 스크린샷 확인
+	> content discovery로 확인된 endpoint들이 많을 때 스크린샷 확인
+
+[취약점 탐색 : github 존재시]
+1. wraith repo of site > data leakage search
+2. search for seem-vulnerable ednpoint from result of github-endpoints
+
+[취약점 탐색 : 직접 탐색]
+1. IDOR
+2. SSRF
+3. CSRF
+4. XSS
+5. SSTI
+6. SQLi
+7. OAuth misconfiguration
+8. race condition
+9. parameter pollution
+10. cache pollution
+11. open redirection
+12. expectable token search
+13. CRLF(Carriage Return / Line Feed) Injection
+14. CL.TE 중복 여부 확인 > HTTP request smuggling
+15. external XML injection bug
+16. logic error
+
+[취약점 탐색 : 사용하고 있는 open source archetecture 구글링]
+
