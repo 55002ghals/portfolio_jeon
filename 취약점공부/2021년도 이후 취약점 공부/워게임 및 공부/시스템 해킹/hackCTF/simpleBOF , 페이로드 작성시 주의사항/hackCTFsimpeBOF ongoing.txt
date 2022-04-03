@@ -1,0 +1,76 @@
+   0x080484cb <+0>:     lea    ecx,[esp+0x4]
+   0x080484cf <+4>:     and    esp,0xfffffff0
+>canary?
+   0x080484d2 <+7>:     push   DWORD PTR [ecx-0x4]
+   0x080484d5 <+10>:    push   ebp
+   0x080484d6 <+11>:    mov    ebp,esp
+>프롤로그
+   0x080484d8 <+13>:    push   ecx
+>argc위치 주소를 push
+   0x080484d9 <+14>:    sub    esp,0x34
+> 52만큼 esp sub
+   0x080484dc <+17>:    mov    DWORD PTR [ebp-0xc],0x4030201
+>[ebp-12]에 ,0x4030201삽입
+   0x080484e3 <+24>:    mov    eax,ds:0x804a040
+   0x080484e8 <+29>:    sub    esp,0x4
+   0x080484eb <+32>:    push   eax
+>stdin push
+   0x080484ec <+33>:    push   0x2d
+>45 push
+   0x080484ee <+35>:    lea    eax,[ebp-0x34]
+   0x080484f1 <+38>:    push   eax
+>[ebp-52] push
+   0x080484f2 <+39>:    call   0x8048380 <fgets@plt>
+   0x080484f7 <+44>:    add    esp,0x10
+   0x080484fa <+47>:    sub    esp,0x8
+   0x080484fd <+50>:    lea    eax,[ebp-0x34]
+   0x08048500 <+53>:    push   eax
+   0x08048501 <+54>:    push   0x8048610
+   0x08048506 <+59>:    call   0x8048370 <printf@plt>
+   0x0804850b <+64>:    add    esp,0x10
+> buf값과 문자열 출력
+   0x0804850e <+67>:    sub    esp,0x8
+   0x08048511 <+70>:    push   DWORD PTR [ebp-0xc]
+   0x08048514 <+73>:    push   0x804861c
+   0x08048519 <+78>:    call   0x8048370 <printf@plt>
+   0x0804851e <+83>:    add    esp,0x10
+>
+   0x08048521 <+86>:    cmp    DWORD PTR [ebp-0xc],0x4030201
+>
+   0x08048528 <+93>:    je     0x8048543 <main+120>
+   0x0804852a <+95>:    cmp    DWORD PTR [ebp-0xc],0xdeadbeef
+   0x08048531 <+102>:   je     0x8048543 <main+120>
+   0x08048533 <+104>:   sub    esp,0xc
+   0x08048536 <+107>:   push   0x8048628
+   0x0804853b <+112>:   call   0x8048390 <puts@plt>
+   0x08048540 <+117>:   add    esp,0x10
+   0x08048543 <+120>:   cmp    DWORD PTR [ebp-0xc],0xdeadbeef
+   0x0804854a <+127>:   jne    0x804857c <main+177>
+   0x0804854c <+129>:   sub    esp,0xc
+   0x0804854f <+132>:   push   0x8048644
+   0x08048554 <+137>:   call   0x8048390 <puts@plt>
+   0x08048559 <+142>:   add    esp,0x10
+   0x0804855c <+145>:   sub    esp,0xc
+   0x0804855f <+148>:   push   0x804866e
+   0x08048564 <+153>:   call   0x80483a0 <system@plt>
+   0x08048569 <+158>:   add    esp,0x10
+   0x0804856c <+161>:   sub    esp,0xc
+   0x0804856f <+164>:   push   0x8048678
+   0x08048574 <+169>:   call   0x8048390 <puts@plt>
+   0x08048579 <+174>:   add    esp,0x10
+   0x0804857c <+177>:   mov    eax,0x0
+   0x08048581 <+182>:   mov    ecx,DWORD PTR [ebp-0x4]
+   0x08048584 <+185>:   leave  
+   0x08048585 <+186>:   lea    esp,[ecx-0x4]
+   0x08048588 <+189>:   ret    
+
+
+RET[4]
+???[4]
+SFP[4]  <ebp
+???[4]
+dummy[8]
+addr[4]
+buf[40]
+---------------------esp
+> buf의 입력값이 45, addr 침범가능

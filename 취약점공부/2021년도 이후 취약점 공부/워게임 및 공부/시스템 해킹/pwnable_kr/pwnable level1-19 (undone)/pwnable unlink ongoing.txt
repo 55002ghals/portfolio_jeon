@@ -1,0 +1,79 @@
+(gdb) disas main
+Dump of assembler code for function main:
+   0x0804852f <+0>:     lea    ecx,[esp+0x4]
+   0x08048533 <+4>:     and    esp,0xfffffff0
+   0x08048536 <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08048539 <+10>:    push   ebp
+   0x0804853a <+11>:    mov    ebp,esp
+> 프롤로그
+   0x0804853c <+13>:    push   ecx
+   0x0804853d <+14>:    sub    esp,0x14
+   0x08048540 <+17>:    sub    esp,0xc
+   0x08048543 <+20>:    push   0x400
+   0x08048548 <+25>:    call   0x80483a0 <malloc@plt>
+   0x0804854d <+30>:    add    esp,0x10
+   0x08048550 <+33>:    sub    esp,0xc
+   0x08048553 <+36>:    push   0x10
+   0x08048555 <+38>:    call   0x80483a0 <malloc@plt>
+   0x0804855a <+43>:    add    esp,0x10
+   0x0804855d <+46>:    mov    DWORD PTR [ebp-0x14],eax
+   0x08048560 <+49>:    sub    esp,0xc
+   0x08048563 <+52>:    push   0x10
+   0x08048565 <+54>:    call   0x80483a0 <malloc@plt>
+   0x0804856a <+59>:    add    esp,0x10
+   0x0804856d <+62>:    mov    DWORD PTR [ebp-0xc],eax
+   0x08048570 <+65>:    sub    esp,0xc
+   0x08048573 <+68>:    push   0x10
+   0x08048575 <+70>:    call   0x80483a0 <malloc@plt>
+   0x0804857a <+75>:    add    esp,0x10
+   0x0804857d <+78>:    mov    DWORD PTR [ebp-0x10],eax
+
+   0x08048580 <+81>:    mov    eax,DWORD PTR [ebp-0x14]
+   0x08048583 <+84>:    mov    edx,DWORD PTR [ebp-0xc]
+   0x08048586 <+87>:    mov    DWORD PTR [eax],edx
+
+   0x08048588 <+89>:    mov    edx,DWORD PTR [ebp-0x14]
+   0x0804858b <+92>:    mov    eax,DWORD PTR [ebp-0xc]
+   0x0804858e <+95>:    mov    DWORD PTR [eax+0x4],edx
+
+   0x08048591 <+98>:    mov    eax,DWORD PTR [ebp-0xc]
+   0x08048594 <+101>:   mov    edx,DWORD PTR [ebp-0x10]
+   0x08048597 <+104>:   mov    DWORD PTR [eax],edx
+
+   0x08048599 <+106>:   mov    eax,DWORD PTR [ebp-0x10]
+   0x0804859c <+109>:   mov    edx,DWORD PTR [ebp-0xc]
+   0x0804859f <+112>:   mov    DWORD PTR [eax+0x4],edx
+
+   0x080485a2 <+115>:   sub    esp,0x8
+   0x080485a5 <+118>:   lea    eax,[ebp-0x14]
+   0x080485a8 <+121>:   push   eax
+   0x080485a9 <+122>:   push   0x8048698
+   0x080485ae <+127>:   call   0x8048380 <printf@plt>
+   0x080485b3 <+132>:   add    esp,0x10
+   0x080485b6 <+135>:   mov    eax,DWORD PTR [ebp-0x14]
+   0x080485b9 <+138>:   sub    esp,0x8
+   0x080485bc <+141>:   push   eax
+   0x080485bd <+142>:   push   0x80486b8
+   0x080485c2 <+147>:   call   0x8048380 <printf@plt>
+   0x080485c7 <+152>:   add    esp,0x10
+   0x080485ca <+155>:   sub    esp,0xc
+   0x080485cd <+158>:   push   0x80486d8
+   0x080485d2 <+163>:   call   0x80483b0 <puts@plt>
+   0x080485d7 <+168>:   add    esp,0x10
+
+   0x080485da <+171>:   mov    eax,DWORD PTR [ebp-0x14]
+   0x080485dd <+174>:   add    eax,0x8
+   0x080485e0 <+177>:   sub    esp,0xc
+   0x080485e3 <+180>:   push   eax
+   0x080485e4 <+181>:   call   0x8048390 <gets@plt>
+   0x080485e9 <+186>:   add    esp,0x10
+   0x080485ec <+189>:   sub    esp,0xc
+   0x080485ef <+192>:   push   DWORD PTR [ebp-0xc]
+   0x080485f2 <+195>:   call   0x8048504 <unlink>
+   0x080485f7 <+200>:   add    esp,0x10
+   0x080485fa <+203>:   mov    eax,0x0
+   0x080485ff <+208>:   mov    ecx,DWORD PTR [ebp-0x4]
+   0x08048602 <+211>:   leave  
+   0x08048603 <+212>:   lea    esp,[ecx-0x4]
+   0x08048606 <+215>:   ret    
+End of assembler dump.

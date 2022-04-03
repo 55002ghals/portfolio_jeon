@@ -1,0 +1,166 @@
+mistake@pwnable:~$ cat mistake.c
+#include <stdio.h>
+#include <fcntl.h>
+
+#define PW_LEN 10
+#define XORKEY 1
+
+void xor(char* s, int len){
+        int i;
+        for(i=0; i<len; i++){
+                s[i] ^= XORKEY;	//비트연산; 1(;XORKEY)과 XOR연산하여 재삽입
+        }
+}
+
+int main(int argc, char* argv[]){
+
+        int fd;
+        if(fd=open("/home/mistake/password",O_RDONLY,0400) < 0){	
+	   //실수! 우선순위는 삽입 연산자보다 비교연산자가 우선!
+	   // 때문에 해당 조건문은 (fd = 0)이 됨!
+                printf("can't open password %d\n", fd);
+                return 0;
+        }
+
+        printf("do not bruteforce...\n");
+        sleep(time(0)%20);
+
+        char pw_buf[PW_LEN+1];
+        int len;
+        if(!(len=read(fd,pw_buf,PW_LEN) > 0)){
+                printf("read error\n");
+                close(fd);
+                return 0;
+        }
+	pw_buf에 10자리 비밀번호를 password 파일에서 읽어와 삽입
+
+        char pw_buf2[PW_LEN+1];
+        printf("input password : ");
+        scanf("%10s", pw_buf2);
+
+        // xor your input
+        xor(pw_buf2, 10);
+
+        if(!strncmp(pw_buf, pw_buf2, PW_LEN)){
+                printf("Password OK\n");
+                system("/bin/cat flag\n");
+        }
+        else{
+                printf("Wrong Password\n");
+        }
+
+        close(fd);
+        return 0;
+}
+
+(gdb) disas main
+Dump of assembler code for function main:
+   0x0000000000400851 <+0>:     push   rbp
+   0x0000000000400852 <+1>:     mov    rbp,rsp
+   0x0000000000400855 <+4>:     sub    rsp,0x50
+   0x0000000000400859 <+8>:     mov    DWORD PTR [rbp-0x44],edi
+   0x000000000040085c <+11>:    mov    QWORD PTR [rbp-0x50],rsi
+   0x0000000000400860 <+15>:    mov    rax,QWORD PTR fs:0x28
+   0x0000000000400869 <+24>:    mov    QWORD PTR [rbp-0x8],rax
+   0x000000000040086d <+28>:    xor    eax,eax
+   0x000000000040086f <+30>:    mov    edx,0x100
+   0x0000000000400874 <+35>:    mov    esi,0x0
+   0x0000000000400879 <+40>:    mov    edi,0x400aec
+   0x000000000040087e <+45>:    mov    eax,0x0
+   0x0000000000400883 <+50>:    call   0x400700 <open@plt>
+   0x0000000000400888 <+55>:    shr    eax,0x1f
+   0x000000000040088b <+58>:    mov    DWORD PTR [rbp-0x38],eax
+   0x000000000040088e <+61>:    cmp    DWORD PTR [rbp-0x38],0x0
+   0x0000000000400892 <+65>:    je     0x4008b5 <main+100>
+   0x0000000000400894 <+67>:    mov    eax,0x400b03
+   0x0000000000400899 <+72>:    mov    edx,DWORD PTR [rbp-0x38]
+   0x000000000040089c <+75>:    mov    esi,edx
+   0x000000000040089e <+77>:    mov    rdi,rax
+   0x00000000004008a1 <+80>:    mov    eax,0x0
+   0x00000000004008a6 <+85>:    call   0x4006b0 <printf@plt>
+   0x00000000004008ab <+90>:    mov    eax,0x0
+   0x00000000004008b0 <+95>:    jmp    0x4009dd <main+396>
+   0x00000000004008b5 <+100>:   mov    edi,0x400b1b
+   0x00000000004008ba <+105>:   call   0x400680 <puts@plt>
+   0x00000000004008bf <+110>:   mov    edi,0x0
+   0x00000000004008c4 <+115>:   mov    eax,0x0
+   0x00000000004008c9 <+120>:   call   0x4006f0 <time@plt>
+   0x00000000004008ce <+125>:   mov    ecx,eax
+   0x00000000004008d0 <+127>:   mov    edx,0x66666667
+   0x00000000004008d5 <+132>:   mov    eax,ecx
+   0x00000000004008d7 <+134>:   imul   edx
+   0x00000000004008d9 <+136>:   sar    edx,0x3
+   0x00000000004008dc <+139>:   mov    eax,ecx
+   0x00000000004008de <+141>:   sar    eax,0x1f
+   0x00000000004008e1 <+144>:   sub    edx,eax
+   0x00000000004008e3 <+146>:   mov    eax,edx
+   0x00000000004008e5 <+148>:   shl    eax,0x2
+   0x00000000004008e8 <+151>:   add    eax,edx
+   0x00000000004008ea <+153>:   shl    eax,0x2
+   0x00000000004008ed <+156>:   mov    edx,ecx
+   0x00000000004008ef <+158>:   sub    edx,eax
+   0x00000000004008f1 <+160>:   mov    edi,edx
+   0x00000000004008f3 <+162>:   mov    eax,0x0
+   0x00000000004008f8 <+167>:   call   0x400720 <sleep@plt>
+   0x00000000004008fd <+172>:   lea    rcx,[rbp-0x30]
+   0x0000000000400901 <+176>:   mov    eax,DWORD PTR [rbp-0x38]
+   0x0000000000400904 <+179>:   mov    edx,0xa
+   0x0000000000400909 <+184>:   mov    rsi,rcx
+   0x000000000040090c <+187>:   mov    edi,eax
+   0x000000000040090e <+189>:   mov    eax,0x0
+   0x0000000000400913 <+194>:   call   0x4006d0 <read@plt>
+   0x0000000000400918 <+199>:   test   eax,eax
+   0x000000000040091a <+201>:   setg   al
+   0x000000000040091d <+204>:   movzx  eax,al
+   0x0000000000400920 <+207>:   mov    DWORD PTR [rbp-0x34],eax
+   0x0000000000400923 <+210>:   cmp    DWORD PTR [rbp-0x34],0x0
+   0x0000000000400927 <+214>:   jne    0x40094c <main+251>
+   0x0000000000400929 <+216>:   mov    edi,0x400b30
+   0x000000000040092e <+221>:   call   0x400680 <puts@plt>
+   0x0000000000400933 <+226>:   mov    eax,DWORD PTR [rbp-0x38]
+   0x0000000000400936 <+229>:   mov    edi,eax
+   0x0000000000400938 <+231>:   mov    eax,0x0
+   0x000000000040093d <+236>:   call   0x4006c0 <close@plt>
+   0x0000000000400942 <+241>:   mov    eax,0x0
+   0x0000000000400947 <+246>:   jmp    0x4009dd <main+396>
+   0x000000000040094c <+251>:   mov    eax,0x400b3b
+   0x0000000000400951 <+256>:   mov    rdi,rax
+   0x0000000000400954 <+259>:   mov    eax,0x0
+   0x0000000000400959 <+264>:   call   0x4006b0 <printf@plt>
+   0x000000000040095e <+269>:   mov    eax,0x400b4d
+   0x0000000000400963 <+274>:   lea    rdx,[rbp-0x20]
+   0x0000000000400967 <+278>:   mov    rsi,rdx
+   0x000000000040096a <+281>:   mov    rdi,rax
+   0x000000000040096d <+284>:   mov    eax,0x0
+   0x0000000000400972 <+289>:   call   0x400710 <__isoc99_scanf@plt>
+   0x0000000000400977 <+294>:   lea    rax,[rbp-0x20]
+   0x000000000040097b <+298>:   mov    esi,0xa
+   0x0000000000400980 <+303>:   mov    rdi,rax
+   0x0000000000400983 <+306>:   call   0x400814 <xor>
+   0x0000000000400988 <+311>:   lea    rcx,[rbp-0x20]
+   0x000000000040098c <+315>:   lea    rax,[rbp-0x30]
+   0x0000000000400990 <+319>:   mov    edx,0xa
+   0x0000000000400995 <+324>:   mov    rsi,rcx
+   0x0000000000400998 <+327>:   mov    rdi,rax
+   0x000000000040099b <+330>:   call   0x400670 <strncmp@plt>
+   0x00000000004009a0 <+335>:   test   eax,eax
+   0x00000000004009a2 <+337>:   jne    0x4009bf <main+366>
+   0x00000000004009a4 <+339>:   mov    edi,0x400b52
+   0x00000000004009a9 <+344>:   call   0x400680 <puts@plt>
+   0x00000000004009ae <+349>:   mov    edi,0x400b5e
+   0x00000000004009b3 <+354>:   mov    eax,0x0
+   0x00000000004009b8 <+359>:   call   0x4006a0 <system@plt>
+   0x00000000004009bd <+364>:   jmp    0x4009c9 <main+376>
+   0x00000000004009bf <+366>:   mov    edi,0x400b6d
+   0x00000000004009c4 <+371>:   call   0x400680 <puts@plt>
+   0x00000000004009c9 <+376>:   mov    eax,DWORD PTR [rbp-0x38]
+   0x00000000004009cc <+379>:   mov    edi,eax
+   0x00000000004009ce <+381>:   mov    eax,0x0
+   0x00000000004009d3 <+386>:   call   0x4006c0 <close@plt>
+   0x00000000004009d8 <+391>:   mov    eax,0x0
+   0x00000000004009dd <+396>:   mov    rdx,QWORD PTR [rbp-0x8]
+   0x00000000004009e1 <+400>:   xor    rdx,QWORD PTR fs:0x28
+   0x00000000004009ea <+409>:   je     0x4009f1 <main+416>
+   0x00000000004009ec <+411>:   call   0x400690 <__stack_chk_fail@plt>
+   0x00000000004009f1 <+416>:   leave  
+   0x00000000004009f2 <+417>:   ret  

