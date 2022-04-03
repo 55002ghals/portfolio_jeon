@@ -1,0 +1,29 @@
+다른 라이브러리에 있는 프로시져(함수 등)을 사용하려할 때,
+해당 함수는 PLT(Procedure Linkage Table)내에 있는 함수를 찾아
+호출하고, 해당 PLT는 GOT(Global Offset Table)내에 있는 해당 함수의
+실제 주소를 찾아 호출(점프)한다.
+
+즉, 함수의 실제 주소는 GOT에 담겨있으며, 그 주소를 담고있는 GOT 주소를
+담고있는 테이블이 PLT가 되는 것이다.
+
+-> 즉, 어셈블리에서 나오는 함수 호출 할때의 그 주소는 모두 PLT에서 GOT를 호출하는
+   명령어덩어리를 가리킨다.
+   
+ex)
+0x80487fe <main+234>:   push   %eax
+0x80487ff <main+235>:   push   $0x0
+0x8048801 <main+237>:   lea    0xffffffd8(%ebp),%eax
+0x8048804 <main+240>:   lea    0x30(%eax),%edx
+0x8048807 <main+243>:   push   %edx
+0x8048808 <main+244>:   call   0x8048468 <memset>
+0x804880d <main+249>:   add    $0xc,%esp
+
+위를 보고 gdb에 "disas 0x8048468"를 한다면?
+	-> _init 함수로 이동하게 된다. memset 함수의 어셈블림 명령어를 볼 수는 없다.
+	
+	-> 아마 까보진 않았는데 _init함수에서 GOT를 참조하여 본 함수를 호출하겠지 싶음.
+
+
+
+
+

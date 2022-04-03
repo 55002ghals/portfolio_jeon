@@ -1,0 +1,10 @@
+gcc -fPIC -shared ./test.c -o testOperate
+
+사용 옵션)
+	:-fPIC(Position-Indipendent Code) : 실행파일을 동적 라이브러리 로 사용하겠다는 옵션
+	:-shared : 공유 라이브러리로 하겠다는 옵션
+
+gcc명령어에서의 -o의 위치)
+	gcc [소스파일] -o [만들어질 실행파일]
+
+		-> -o가 gcc 바로 뒤에 나와도 되긴 된다. 근데 다른 옵션이랑 같이 나오면 안되는 것같다..  

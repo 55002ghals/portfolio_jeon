@@ -1,0 +1,11 @@
+linux에서 bytes라면서 지랄하는 python 에러 코드 나올 경우
+> python3이후부터는 bytes와 string사이의 명확한 구분이 지어지기에, 서로 상종인 안된다.
+> 때문에 뭔가 걸리적거리는 오류가 많아짐.
+> 빡치면 현재 python으로 연결된 python의 버전을 python2 버젼대로 맞춰라.
+
+"$ which python" 으로 현재 python 심볼릭 링크 위치 찾고, 지워라(sudo필요)
+보통 같은 디렉토리에 python 파일이 존재한다. 그리고 python3가 있다면 
+그 하위버전도 있을 터이니(없음 깔아라) 심볼릭 링크를 낮은 버젼의 파이썬으로 연결하여 다시 만들어라
+PATH는 똑같이 존재할테니 그냥 다시 사용하면 될 거다.
+
+"$ ln -s /usr/bin/python /usr/bin/python2.7"이런 식으로
