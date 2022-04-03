@@ -1,0 +1,2 @@
+ngnix의 phusion passenger 통합모드 일 경우(아닐 경우는 모르겠음.) 서버의 log 파일은
+/opt/nginx/logs/에 위치하며, 해당 디렉토리에 access.log와 error.log 파일이 둘다 있다.
