@@ -1,0 +1,518 @@
+토픽 목록:
+기술소개
+기본문법
+하이퍼텍스트와 속성
+문서의 구조
+DOCTYPE
+웹사이트 만들기
+
+단락-p
+줄바꿈-br
+이미지-img
+
+텍스트입력 ~
+파일 업로드
+
+[HTML]
+
+-Hyper Text Markup Language의 약자
+
+-이는 하이퍼텍스트를 가장 중요한 특징으로 하는,
+        마크업이라는 형식을 가진
+        프로그래밍 언어 
+        라는 의미임.
+
+-사람과 웹 브라우저 사이의 언어(즉 웹 브라우저에 명령하는 코드인것임)
+
+-페이지 아무대나 대고 '페이지 소스 보기'하면 HTML코드를 볼 수 있음
+
+
+[페이지 만들기]
+
+1. 메모장으로 코드 작성
+2. 저장할때 확장자는 html로 하고 파일은 "모든 파일"로 설정한후 저장
+3. 실행하면 페이지 열림
+
+
+[태그]
+
+-"<tag>  </tag>"꼴임.
+앞에 tag는 시작태고, 뒤에 /태그는 닫히는 태그 라고한다.
+
+1. <strong>: 태그 사이의 문자를 굵게
+
+2. <h1>: 태그 사이의 문자를 두껍게하고 크게한뒤 맨 위에 놓아서 제목처럼 함.
+
+3. <h2>: h1태그보다 조금더 작음
+
+※줄바꿈은 HTML에서 의미가 없음
+
+4. <a>:문자열에 하이퍼텍스트부여함. href속성은 필수로 있어야함.
+
+5.<ol>: ol요소 안에 li요소로 목록항목을 표현한다. 이것으로 순서가 있는 부분을 나타낼 수 있다.
+
+6.<title>: 문자열을 웹 페이지의 이름(맨 위에 창에 뜨는거)으로 설정.
+
+--------------------------------------------------------
+e.g)
+<ol>
+	<li>1등: 전명환</li>
+	<li>2등: 홍진호</li>
+</ol>
+
+출력:
+1. 1등:전명환            //앞에 자동으로 숫자가 붙음 Ordered List가 그럼.
+2. 2등:홍진호
+-----------------------------------------------------------
+
+6.<ul>:순서 없는 목록요소임. <ol>태그와 비슷하지만 숫자가 안붙고 동그라미가 앞에옴
+
+[속성]
+
+-태그에 추가적으로 달리는 정보
+
+e.g)
+<a href=https://opentutorials.org/course/2039/10932 target="_blank">링크 만들기</a>
+    ->위에 a태그는 다른 사이트로 가는링크를 문자에 삽입하는 태그이다.
+       하지만 그것만으로는 정보가 부족하므로, href속성을 여는 태그에 삽입하여 주소를 지정하고,
+       추가적으로 target-"_blank"속성을 이용하여 새 탭에서 해당 사이트가 열리도록 하였다.
+
+* <a title="string">속성을 이용해서 <a>로 링크를 부여했을 때 마우스만 가져다 놔도 string이 보이도록 할 수있다.
+
+-속성의 순서는 상관없다.
+
+
+※문자가 깨질때 해결법:
+<meta charset="uft-8">
+
+[문서의 구조]
+
+-title태그같은 본문을 직접적으로 나타내지 않고 보이지 않는 곳에서
+ 페이지의 부수적인 요소를 명령하는 명령어는 따로 구분한다.
+
+<head>태그
+: 본문이 아닌 태그들을 담는다.
+
+<body>태그
+: 본문인 태그들을 담는다.
+
+<html>태그
+: 가장 큰 태그 그냥 main함수마냥 크게 감싸는 것임.
+---------------------------------------------------------------------
+e.g)
+
+<html>
+	<head>
+	<title>google</title>
+	</head>
+
+	<body>
+	<h2><a href="www.naver.com" target="_blank">함 눌러봐용</a></h2>
+	</body>
+
+</html>
+--------------------------------------------------------------------
+
+[doctype]
+
+-Document type declaration; 자신이 작성한 HTML코드의 종류를 나타냄.
+
+-<HTML>태그 앞에 <!DOCTYPE html>이라고 적어놓으면 됨.
+
+[웹 사이트 만들기]
+
+-클릭을 통한 상호작용을 통해 페이지를 이동하는 웹사이트를 구현해보자.
+
+-우선 하나의 사이트의 틀을 짠다.
+
+-하이퍼 택스트를 통한 페이지 이동으로 웹사이트를 구성할 것이므로
+ 우선은 하이퍼 텍스트를 만든다. 이때, 아직 만들진 않은 페이지지만
+ 이렇게 해놓는다.
+
+<a href="a.html">여기누르면 하이퍼링크!</a>
+
+-아직 a.html이라는 페이지는 만들지 않았지만 일단 해놓는거다.
+
+-이제 제작 ㄱㄱ
+
+
+[중요 태그들]
+
+<p>
+: paragraph; 단락을 표현 할 때 사용하는 태그
+
+-<p>와 </p>사이의 문자열(들)이 한 단락으로 구분된다.
+ <br>태그와는 달리 단락처럼 보이게 단락사이의 띄는 간격이 비교적 작다.
+
+
+<br>
+: A forced line-break; 새로운 행에서 출력이 시작되도록 한다.
+
+-이 태그는 앞과 다르게 내용이 없는 태그이다, 즉 <br>하나로만 구성되며
+ 이는 CRLF를 의미한다. 
+
+※단락임을 표현하고 싶다면 그냥 <p>를 쓰는게 더 보기 이쁘다.
+
+
+<img>
+:사진을 입력할 수 있음.
+
+e.g)
+<img src="rose.jpg.jpg" width=500 alt="산 이미지" title="요고슨 장미임미다">
+
+속성:
+src="사진의 이름(확장자 필수!)"
+:사진을 지정
+
+width / height="   "
+: 사진의 높이와 너비를 제시함.
+->이때 원본 사진의 비율과 다르면 이미지가 찌그러짐
+-그러므로 width나 height 둘 중에 하나만 값을 원하는 값으로 해주면
+ 그 해상도에 맞추어서 html이 알아서 나머지 하나를 결정해서 출력함.
+
+alt="string"
+:alternative text; 사진이 지정된 주소를 찾지못해 사진이 깨지면
+ 대신하여 출력할 문자.
+
+title="string"
+: 툴팁; 사진에 마우스를 가져다 대기만하면 나오는 문구
+->이건 하이퍼텍스트에도 있는 속성이다.
+
+[form]
+
+-사용자의 입력을 서버로 전송하는 것을 form이라고 함.
+
+<!DOCTYPE html>
+<html>
+<body>
+<form action="https://localhost/login.php">
+	<p>아이디:<input type="text" name="id"></p>
+	<p>비밀번호:<input type="password" name="pwd"></p>
+	<input type="submit">
+</form>
+</body>
+</html>
+
+- input태그에 type속성으로 "text"를 지정하면 그냥 문자열을 입력받는 창이 되고,
+   password를 지정하면 문자열을 입력받고 보여주지는 않는 그 비밀번호 칠때 그 form이 출력된다.
+
+ <input type="submit">
+  -서버에 보내는 버튼을 만들어준다.
+  -value 속성을 이용해서 해당 버튼 위의 text를 지정가능(default: 제출)
+
+<form>
+-이때 form 태그의 action속성을 통해 서버의 주소를 지정해 줄 수 있다.
+
+-그리고 서버에 보낼때 보내는 데이터의 이름이 있어야하는데,
+ 이것은 input태그에서 name속성을 통해 지정한다.
+
+※여기서 URI의 파라미터를 통해 각 name으로 부여된 이름의 데이터를 볼 수 있음.
+   예를 들어 위의 HTML의 결과를 submit한후, 나오는 페이지는
+   https://localhost/login.php?id=5502ghals&pwd=tnqk12
+   이런 식으로 짜여짐.
+-> 이는 localhost의 login.php 웹 어플리케이션에 ?뒤의 파라미터의 정보를 넘긴다는 의미임.
+
+
+[form tags]
+
+<input type="text" name="id" value="아이디입력">
+
+value속성
+: value속성을 이용해서 사용자가 input칸에 아무것도 적지 않아도
+ 어떤 문자열이 적혀있도록 할 수 있음. 
+
+<textarea>태그
+:<input type="text">보다 더 큰 칸으로 입력값을 받을 수있음.
+ 
+<textarea cols="30" rows="10">여기에 쓰고싶은말은 default text로써 활용됨</textarea>
+
+cols 속성
+: textarea의 행 수 제시
+
+rows 속성
+:한 행당 글자 수 제시
+
+[dropdown list]
+-무언가 선택지를 주고 싶을때 어떻게 하는가?
+
+<body>
+<form action="https://localhost/color.php">
+	<select name="color">
+	<option value="red">빨간색</option>	
+	<option value="black">파란색</option>
+	<option value="yellow">노란색</option>
+	</select>
+	<input type="submit">
+</form>
+</body>
+
+<select>태그: 안쪽에 <option>이라는 태그를 따로 두어 선택지를 만들 수 있다.
+	->이 또한 사용자에게서 받는 정보이기 때문에 서버에 보내야한다.
+	->form태그로 주소를 지정하자.
+
+-select태그는 name이라는 속성으로 서버에 보내질 데이터의 이름을 정하며,
+ option태그는 value라는 이름으로 서버에게 보내질 데이터의 이름을 정한다.
+  -> 위와 같은 코드에서 검은색을 선택하면 ?color=black 이라는 파라미터가 짜여진다.
+
+※서버에 가는 데이터의 이름(name이든 value든)중복되면 안된다.
+
+multiple속성
+:같은 이렇게 놓으면 중복선택이 가능하다.
+  ->뭐 지정이 아니라 그냥 multiple만 쓰면된다.
+
+<body>
+<form action="https://localhost/color.php">
+	<h1>컬러 단일 선택</h1>
+	<select name="color">
+	<option value="red">빨간색</option>	
+	<option value="black">파란색</option>
+	<option value="yellow">노란색</option>
+	</select>
+
+	<h1>컬러 다중 선택</h1>
+	<select name="color2" multiple>
+	<option value="red">빨간색</option>	
+	<option value="black">파란색</option>
+	<option value="yellow">노란색</option>
+	</select>
+	<input type="submit">
+</form>
+</body>
+
+-> Ctrl키를 누르고 하면 다중 선택이 가능한 창이 출력되는데,
+    직관적으로 이것을 알기가 쉽지 않으므로 보통 체크박스 UI를 사용함.
+
+[button]
+-보통 onclick=""과 같은 속성으로 자바스크립트와 함께 운용될때 쓰임새가 있다.
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+</head>
+<body>
+	<input type="button" value="이것이 버튼입니다." onclick="alert('Hello World!')">
+	<input type="reset">
+</body>
+</html>
+
+-> 위의 코드에서 alert('Hello world!') 부분은 JS이다.
+
+[hidden field]
+-눈에 보이지 않지만 서버에 정보를 전달할 때 사용함.
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+</head>
+<body>
+	<form action="https://localhost/hidden.php">
+	<input type="text" name="id">
+	<input type="hidden" name="hiddendata" vlaue="egoing">
+	<input type="submit">
+	</form>
+</body>
+</html>
+
+->위와 같이하면 egoing이라는 value를 가진 hiddendata라는 이름의 데이터가 
+   서버에 보내지게 됨.
+
+[label]
+
+-각 input태그들을 설명하기위해 우리는 다음과 같이 해왔다.
+<p>
+	아이디:<input type="text" name="id">
+</p>
+
+-이것보다 HTML에서 권장하고 또 전문적인 것이 label태그이다.
+
+<p>
+	<label for="id_txt">아이디:</label>
+	<input id="id_txt"type="text" name="id">
+</p>
+
+->위와 같이 사용하며, label의 for 속성을 통해 해당 label의 무엇의 label인지를
+   표시하며, 마찬가지로 input태그에서 id속성을 통해 id를 부여했다.
+
+-기능상 차이점은 다음과 같다.
+ 원래는 "아이디:"라는 텍스트는 그저 텍스트였다면, label로써의
+ "아이디:"는 id_txt를 지칭하는 것이기 때문에 "아이디:"를 클릭해도
+ 커서가 INPUT으로 가 있는 것을 확인할 수 있다.
+
+-다음과 같이 코드를 작성해도 같은 레이블 지정이 가능하다.
+
+<p>
+	<label>아이디:
+	<inputtype="text" name="id">
+	</label>
+</p>
+
+
+[check box]
+<body>
+	<form action="~~~">
+	<label>
+		<input type="checkbox" name=color value="red">빨간색
+	</label><br>
+
+	<input type="submit">
+	</form>
+</body>
+
+->위와같이하면 체크박스가 생기며, color의 이름을 가지고 value는 red인
+   데이터를 전송할 수 있다.
+
+
+[method]
+
+-지금까진 다 GET 메소드였음
+-GET방식은 파라미터에 전달 데이터가 다 노출됨, 그러므로 아이디 비밀번호 등의
+ 개인정보가 유출 될 수 있음, 이때 필요한 방식이 POST임
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+</head>
+<body>
+	<form action="https://localhost/method.php" method="post">
+	<input type="text" name="id">
+	<input type="text" name="pwd">
+	<input type="submit">
+	</form>
+</body>
+</html>
+
+-위와같이 form의 method 속성을 이용해서 메소드를 지정할 수 있다.
+-POST 메소드는 GET과 비슷하지만 파라미터에 직접 노출되지 않는다는 보안성이 있음.
+  ->왠만하면 POST방식으로 설정함
+  -> Default값은 GET메소드임 
+
+[파일 업로드]
+
+<body>
+	<form action="https://localhost/upload.php" method="post" enctype="multipart/form-data">
+	<input type="file" name="somefile">
+	<input type="submit">
+	</form>
+</body>
+
+-> input태그의 type 속성에서 file이라고 지정하면 내 컴퓨터에서 파일을
+    가져올 수 있다. 이렇게 submit하면 form태그로의 주소로 파일이 간다.
+
+-이때 추가적으로 form태그에서 설정해야할 것이 있다.
+ 우선 메소드는 POST여야하며, enctype="multipart/form-data"
+ 라고 속성을 추가해야한다. 그 이유는 서버쪽과 관련됨.(생략)
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@)(~4/5)
+
+[HTML의 정보로써의 역할]
+
+[meta 태그]
+
+-HTML의 태그들을 그 태그안의 코드를 설명한다는 점에서 meta태그라고 할수 있음
+
+-이 페이지의 요약적인 설명을 하기위한 태그가 meta태그임.
+
+--------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">  //이 문서는 utf-8이라는 형식으로 저장된 파일이라고 설명하는 것임(이거 저장할때 설정가능)
+	<meta name="description" content="메타태그의 예시를 나타내는 페이지이다">  //검색엔진과의 호환을 위한 페이지 요약 지정
+	<meta name="keyword" content="메타태그,예시,코딩,설명">  //이와 같은 내용을 적어놓으면 이 코드를 분류가거나 검색하는데 유용하게 사용 가능하다.
+	<meta="author" content="CRR">  //저자(author) 지정
+</head>
+<body>
+	메타태그 예시페이지
+</body>
+</html>
+-----------------------------------------------------------------------------------------
+
+-> 위와같이 여러가지 요소가 있음
+
+[sementic tag(;의미론적 태그]
+
+-웹 페이지에서 통상 많이 사용하는 구조에 의미를 분명히 부여하기 위해서 
+ 의미론적 태그를 사용함.
+
+<header>태그: 이 페이지에서 가장 중요하다고 강조하기 위한 태그로써,
+ 	        페이지에는 아무 기능적인 차이가 드러나지 않는다. 주석같은 느낌임.
+
+<footer>태그: 페이지 맨  아래에 부수적인 정보임을 표현하고 싶을때 감싸는 태그임.
+	        (ex. 구글검색엔진 페이지 맨 아래에 개인정보 보호정책 같은 조그만 링크)
+
+<nav>태그: 페이지를 탐색할때 쓰는 네비게이션 같은 역할을 하는 코드를 묶음.
+	     (ex. 학교사이트에서 맨 위에 학사일정, 공지사항, 학교소개 같은거 이동하는 것들)
+
+<article>태그: 페이지의 본문을 나타내는 내용을 묶음(구분을 위해서 여러 개로 나눠서 묶을 수 있음.)
+
+<section>태그: article들을 묶는 큰 태그.
+-------------------------------------------------------------------------------------
+e.g)
+
+<section>
+	<article>
+<p>
+	<h1>기사 제목1</h1>
+</p>
+	세상에 이런일이 있다고 함미다 이게 말이됩니까 이런일이 있따니...	
+	</article>
+	<article>
+<p>
+	<h1>기사 제목2</h1>
+</p>
+	세상에 저런일이 있다고 함미다 이게 말이됩니까 저런일이 있따니...
+	</article>
+</section>
+-------------------------------------------------------------------------------------
+
+->뭐 별로 묶일만한 태그가 없으면 없으면 그냥 section태그로 묶으라고 함
+
+[iframe태그]
+-어떤 문서 안에 다른 내용의 문서를 그대로 가져오는 기법
+---------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">  
+</head>
+<body>
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/6Y8PpdMb6BI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+</body>
+</html>
+-------------------------------------------------------------------------------------
+->위의 iframe태그는 유튜브에서 링크복사에 가면 복사헤서 가져올 수 있다.
+
+-iframe은 보안적으로 굉장히 취약한 명령어이다. 
+
+-예를 들어 iframe으로 가져올 페이지에 다음과 같은 코드가 있었다.
+-----------------------------------------------------------------------------------
+<body>
+<script>
+	alert("hello world!");
+<body>
+</body>
+--------------------------------------------------------------------------------------
+->그러면 불러온 페이지에도 위의 코드가 그대로 실행되게 된다.
+
+-때문에 웹 개발자의 입장에서는 이러한 공격 위험성을 막아야한다.
+
+----------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">  
+</head>
+<body>
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/6Y8PpdMb6BI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen sandbox></iframe>
+
+</body>
+</html>
+------------------------------------------------------------------------------------------
+
+-위에는 iframe태그의 속성에 sandbox라는 속성을 부여했다.
+
+-sandbox라는 속성은 원천적으로 위험이 될만한 코드들은 제외해서 해당 페이지로
+ 퍼나르게 해준다.(특정 자바스크립트나 form태그가 실행되지 않음)

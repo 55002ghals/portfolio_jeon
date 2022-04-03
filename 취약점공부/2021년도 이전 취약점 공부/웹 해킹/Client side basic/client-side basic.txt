@@ -1,0 +1,195 @@
+[introduction]
+
+-앞선 강의에서 HTTP의 고유 속성에 의해 웹 서버가 사용자를
+ 식별하기 위해 보편적으로 쿠키와 세션을 사용한다고 했다.
+
+-공격자는 사용자로부터 본인을 식별하기 위한 사용자 정보
+ ,즉 쿠키나 쿠키에 저장된 세션 아이디를 탈취하여 사용자 권한을 얻거나,
+ 사용자의 부라우저에서 자바 스크립트를 실행하거나 특별한 행위를 수행하도록
+ 하여 사용자가 보낸것처럼 요청을 서버에 전송하는 것이
+ 클라이언트 사이드 취약점의 주 목표이다.
+
+-위와 같은 클라이언트 사이드 취약점이 발생할 수 있는 이유는
+ 웹 브라우저는 stateful한 상태를 유지하기 위해 모든 HTTP요청에
+ 쿠키를 함께 보내기 때문이다. 
+
+-아래는 웹 브라우저가 리소스를 요청할 때 보내는 HTTP패킷이다.
+------------------------------------------------------
+ex1)
+
+GET /resource1 HTTP/1.1
+Host: dreamhack.io
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36
+Accept: image/webp,image/apng,image/*,*/*;q=0.8
+Referer: http://dreamhack.io/sandbox        //리소스와 같은 서버에서 시작된 요청임을 알 수있다.
+Accept-Encoding: gzip, deflate
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+Cookie: cookie=choco_poco; user_id=admin
+
+ex2)
+
+GET /resource1 HTTP/1.1
+Host: dreamhack.io
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36
+Accept: image/webp,image/apng,image/*,*/*;q=0.8
+Referer: http://theori.io                //리소스와 다른 서버에서 요청한 것이다.
+Accept-Encoding: gzip, deflate
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+Cookie: cookie=choco_poco; user_id=admin
+
+-서로 다른 사이트인 dreamhack.io 와 theori.io에서 
+  dreamhack.io/resource1 에 요청을 보내지만, 
+  같은 쿠키(cookie=choco_poco; user_id=admin) 가 
+  함께 보내지는 것을 확인할 수 있다.
+-----------------------------------------------------------------
+
+-웹 브라우저는 HTTP요청을 생성할때 시작주소(Referer)와
+ 상관없이 대상 호스트가 발급한 쿠키를 삽입한다.
+
+*호스트: 컴퓨터 네트워크에 연결된 컴퓨터나 기타장치를 의미
+	-> 여기서는 각 사이트를 의미
+
+[Same Origin Policy(SOP)]
+
+-앞선 강의에서 자바스크립트를 이용해 페이지 내에 있는 
+ 요소들을 관리 할 수 있다고 했다. 또한, 웹 브라우저를 통해
+ 대상 호스트에 요청 시 사용자의 정보를 담고있는 쿠키도 
+ 함께 전송이 되기 때문에 외부 리소스를 불러오는
+ 엘리먼트들(iframe, img, video)을 자바 스크립트로
+ 관리할 수 있게 된다면 사용자의 동의없이 해당 내용을
+ 읽거나 변조할 수 있게 된다.
+
+-예를 들어, dreamhack.io에서 JS또는 HTML태그를 이용하여
+ 페이스북의 메세지를 보거나 gmail내의 메일들을 보는 행위 등을
+ 웹 브라우저 사용자 권한으로 사용할 수 있게 된다.
+
+-이러한 공격으로부터 웹 브라우저가 사용자를 보호하기 위해
+ Same Origin Policy정책을 만들었다. 구성요소가 모두 
+ 일치해야 동일한 오리진이라 할 수 있다.
+
+-예를 들어 https://same-origin.com/ 이라는 
+ URI와 비교했을 때의 결과는 다음과 같다.
+--------------------------------------------------------------
+https://same-origin.com/frame.html
+-same origin
+path만 다름(서버는 어차피 같으니까 ㅇㅇ)
+
+http://same-origin.com/frame.html
+-cross origin
+scheme이 다름
+
+https://cross.same-origin.com/
+-cross origin
+host가 다름
+
+https://same-origin.com:1234/
+-cross origin
+port가 다름
+--------------------------------------------------------
+
+-동일한 오리진이 아닌 경우에 웹 브라우저가 사용자를 
+ 보호하기 위해 다른 오리진의 문서 또는 스크립트의
+ 내용을 읽지 못하게 하는것이 SOP의 대표적인 예시이다.
+
+-------------------------------------------------------
+
+xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://www.facebook.com/');
+xhr.onreadystatechange = function(e){ console.log(e.target.response); };
+xhr.send();
+
+-위 코드를 https://dreamhack.io/에서 실행하면 에러가 뜬다.
+ (Host가 다름)
+----------------------------------------------------------
+
+<iframe src="" id="my-frame"></iframe>
+<script>
+let myFrame = document.getElementById('my-frame')
+myFrame.onload = () => {
+    try {
+        let secretValue = myFrame.contentWindow.document.getElementById('secret-element').innerText;
+        console.log({ secretValue });
+    } catch(error) {
+        console.log({ error });
+    }
+}
+const fn1 = () => { myFrame.src = 'https://same-origin.com/frame.html'; }    //*
+const fn2 = () => { myFrame.src = 'https://cross-origin.com/frame.html'; }    //**
+</script>
+<button onclick=fn1()>same origin</button><br>
+<button onclick=fn2()>cross origin</button>
+<!-- frame.html -->
+<div id="secret-element">treasure</div>
+
+*:13번 라인이다. 여기서는 same origin 페이지를 불러오는데,
+ 성공적으로 iframe에 로드되면 onload핸들러가 해당 iframe의
+ secret-element의 값을 가져오게된다.
+
+**: 14번 라인이다. 여기서는 same origin이 아닌 https://cross-drigin.com의 페이지를 불러온다.
+    따라서 SOP에 의해 익셉션(exeption)이 출력된다.
+
+*iframe: HRML문서 내에 다른 HTML문서를 보여주고자 할때 사용된다.
+
+*onload핸들러: JS명령어중 하나, HTML문서를 열었을 때, 
+                     브라우저에서 해석되고 페이지가 완성된 후
+	        이 이벤트핸들러가 작동된다.
+	->이벤트 핸들러는 앞에 on이 붙는다, 즉 load가 이벤트이며,
+	   이 load가 끝날때 명령어가 작동한다.
+-----------------------------------------------------------------
+
+[Cross Origin Resoource Sharing(CORS)]
+-일반적으로는 SOP에 의해 서로 다른 오리진끼리 리소스를 공유하지 못한다.
+ 하지만 개발,운영 등의 목적으로 다른 오리진들과 리소스를 공유해 하는 상황이
+ 발생하며, SOP가 적용된 상태에서도 리소스 공유 방법이 있다.
+
+postMessage:
+메시지를 주고받기 위한 이벤트 핸들러를 이용해 
+리소스를 공유합니다.
+
+JSONP:
+스크립트 태그를 통해 외부 자바스크립트 코드를 호출하면
+현재 오리진에서 해당 코드가 실행된다는 점을 이용한 방법입니다. 
+스크립트 태그를 통해 다른 오리진의 리소스를 요청하고, 
+응답 데이터를 현재 오리진의 Callback 함수에서 다루는 
+방식을 통해 리소스를 공유합니다.
+
+Cross Origin Resource Sharing (CORS) 헤더 사용:
+다른 오리진이 허용하는 설정 등을 HTTP 헤더를 통해 
+확인 한 후 허용하는 요청을 보내 리소스를 공유하는 방식입니다.
+
+(코드가 너무 어렵당 가서 읽어봐라)
+
+[다룰 클라이언트 사이드 해킹의 종류]
+
+Cross Site Scripting (XSS)
+공격자의 입력값이 크로스 사이트의 자바스크립트 일부로 
+웹 브라우저에서 실행되는 취약점을 말합니다. 
+실행된 스크립트는 해당 사이트의 일부가 되어 
+SOP 제약 없이 사이트의 구조를 변경하거나 
+임의 HTTP 요청을 보낼 수 있습니다.
+
+Cross Site Request Forgery (CSRF)
+비정상적으로 사용자의 의도와 무관하게 
+HTTP 요청을 보내는 것을 CSRF 공격이라 합니다. 
+Simple Request나 HTML 엘리먼트면 SOP의 
+제약을 받지 않는 다는 점을 이용합니다.
+
+Open Redirect
+Redirect 기능을 악용해 피싱사이트로 접속을 유도하거나,
+ 다른 취약점을 연계하여 사용자를 공격할 수 있습니다.
+
+Click Hijacking
+공격자가 생성한 버튼, 이미지와 같은 엘리먼트를 
+정상적인 iframe위에 겹쳐 올려 UI를 스푸핑해 
+사용자 의도와는 다른 작업을 수행하게 하는 취약점입니다.
+
+
+
+
+
+
+
+
+
